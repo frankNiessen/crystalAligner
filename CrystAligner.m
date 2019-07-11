@@ -18,9 +18,12 @@
 % *************************************************************************
 % Copyright 2018 Frank Niessen (see attached MIT license file)
 
-function [Out1,Out2,Out3] = CrystAligner()
+function [epsilon,rot,oNew] = CrystAligner()
 %function CrystAligner()
-clc; close all; 
+%epsilon:   Angular deviation from ideal alignment (fitness function value)
+%rot:       Stage rotation angles of optimal solution (optimal individuals of fitness function
+%oNew:      New orientation after alignment of crystal
+clc; close all; warning('off','all');
 fprintf('\n*************************************************************');
 fprintf('\n                      CrystAligner v. 1.0 \n');
 fprintf('*************************************************************\n\n');
@@ -43,7 +46,8 @@ axs.sym   = [   1        0   ];                                            %Flag
 axs.rot = [xvector; zvector];                                              %Microscope axes 1 and 2 for tilt/rotation of stage i.e. [0 0 1; 1 0 0], defaults:  [xvector | yvector | zvector]
 optim.LB =[    0     -180  ];                                              %Lower bound values for rotation around microscope axes 'axs.rot' in degree
 optim.UB =[   20      180  ];                                              %Upper bound values for rotation around microscope axes 'axs.rot' in degree
-axs.invRot = [ 0       1   ];                                              %Flag: Invert direction of stage rotation/tilt for axes 'axs.rot' (accounting for different rotation conventions of different stage systems)
+axs.sign = [   1      -1   ];                                              %Flag: Sign of axis [1] Positive (RightHand AntiClock.) [-1] Inverted (RightHand Clockwise) - for axes 'axs.rot' (accounting for different rotation conventions of different stage systems)
+axs.order =[   2       1   ];                                              %Order of rotation axes in hierarchy [2 1] -> 2nd occuring rotation and 1st occuring rotation
 % *** Genetic algorithm - optimization settings
 %Genetic algorithm
 optim.popSz = 500;                                                         %Population size
@@ -93,9 +97,8 @@ scrPrnt('Ini',crys,axs,dir,optim);                                         %Scre
 [oNew,stgRot,x,eps] = runOptim(dir,axs,optim,o,FIB,ss);                    %Optimization function
 %% Plot stereographic projection and inverse polefigure of aligned equivalent crystal directions
 plotting(optim,dir,oNew,crys,axs);                                         %Plotting function
-Out1 = eps.opt;                                                            %Assign return value
-Out2 = x.opt;                                                              %Assign return value
-Out3 = oNew;                                                               %Assign return value
+epsilon = eps.opt;                                                         %Assign return value
+rot = x.opt;                                                               %Assign return value
 fprintf('\n -> All done!\n');                                              %ScreenPrint
 end
 %% iniMtex
@@ -193,9 +196,7 @@ for i = 1:length(dir.Mil.ax{1}) %Loop over crystal directions for parallel align
         end
         x.opt(i,:) = x.ga(ind,:);                                          %Save optimal solution
         eps.opt(i,:) = eps.ga(ind,:);                                      %Save misalignment of optimal solution
-        axs.invRot(axs.invRot==1) = -1;                                    %Adapt possible different stage rotation convention for output  
-        axs.invRot(axs.invRot==0) = 1;                                     %Adapt possible different stage rotation convention for output  
-        x.out = x.opt.*axs.invRot;                                         %Adapt possible different stage rotation convention for output       
+        x.out = x.opt.*axs.sign;                                         %Adapt possible different stage rotation convention for output       
         %Plot optimal solution
         if optim.plot
             h.ax = findobj('type','axes','tag','gaplotpareto');            %Find axes
@@ -204,12 +205,13 @@ for i = 1:length(dir.Mil.ax{1}) %Loop over crystal directions for parallel align
             plot(eps.opt(i,1),eps.opt(i,2),'*k');                          %Plot marker
         end
             % Process optimization results
-        %Find out which second crystal direction was aligned
+        %Find out which second crystal direction was aligned      
         rotTot = 1;
-        for r = 1:size(axs.rot,1)
-            rot(r) = rotation('axis',axs.rot(r),'angle',x.opt(r)*degree);              %Compute rotation around microscope rotation axis 'r' 'axs.rot(r)'
-            rotTot = rotTot*rot(r);
-        end
+        for r = 1:size(axs.order,2)
+            axNr = axs.order(r);
+            rot(axNr) = rotation('axis',axs.rot(axNr),'angle',x.opt(axNr)*degree);     %Compute rotation around microscope rotation axis 'r' 'axs.rot(r)'
+            rotTot = rot(axNr)*rotTot;
+        end       
         for j=1:length(dir.Mil.ax{2})
             if axs.sym(2)
                 dirs = symmetrise(dir.Mil.ax{2}{j});
@@ -226,9 +228,7 @@ for i = 1:length(dir.Mil.ax{1}) %Loop over crystal directions for parallel align
         fMin = @(x)minFunc(x,o,dirs,axs);           
         % *** Run optimization *****
         [x.opt(i,:),eps.opt(i,:)] = ga(fMin,size(axs.rot,1),[],[],[],[],optim.LB,optim.UB,[],optim.opt); %genetic algorithm
-        axs.invRot(axs.invRot==1) = -1;                                    %Adapt possible different stage rotation convention for output  
-        axs.invRot(axs.invRot==0) = 1;                                     %Adapt possible different stage rotation convention for output  
-        x.out = x.opt.*axs.invRot;                                         %Adapt possible different stage rotation convention for output  
+         x.out = x.opt.*axs.sign;                                         %Adapt possible different stage rotation convention for output  
     else
         error('Invalid choice of optimization algorithm');                 %No valid choice of alcrys.oithm
     end
@@ -256,9 +256,10 @@ function eps = minFunc2D(x,o,CD1,CD2,axs)
 %under consideration of weighting factors 'wFac'
 warning('off','all');
 rotTot = 1;
-for r = 1:size(axs.rot,1)
-    rot(r) = rotation('axis',axs.rot(r),'angle',x(r)*degree);              %Compute rotation around microscope rotation axis 'r' 'axs.rot(r)'
-    rotTot = rotTot*rot(r);
+for r = 1:size(axs.order,2)
+    axNr = axs.order(r);
+    rot(axNr) = rotation('axis',axs.rot(axNr),'angle',x(axNr)*degree);     %Compute rotation around microscope rotation axis 'r' 'axs.rot(r)'
+    rotTot = rot(axNr)*rotTot;
 end
 eps(1) = min(angle(rotTot*o{1}*CD1,axs.align(1))/degree);                  %Find misalignment of microscope axis 1 'axs.align(1)' with 'o*CD' subject to rotation 'rotTot'
 epsTemp = zeros(length(CD2),1);                                            %Preallocate memory for 'epsTemp'
@@ -282,9 +283,10 @@ function err = minFunc(x,o,CD,axs)
 %o: Crystal orientation
 %CD: Crystal directions
 rotTot =1;
-for r = 1:size(axs.rot,1)
-    rot(r) = rotation('axis',axs.rot(r),'angle',x(r)*degree);              %Compute rotation around microscope rotation axis 'r' 'axs.rot(r)'
-    rotTot = rotTot*rot(r);
+for r = 1:size(axs.order,2)
+    axNr = axs.order(r);
+    rot(axNr) = rotation('axis',axs.rot(axNr),'angle',x(axNr)*degree);     %Compute rotation around microscope rotation axis 'r' 'axs.rot(r)'
+    rotTot = rot(axNr)*rotTot;
 end
 err = min(angle(rotTot*o{1}*CD,axs.align(1))/degree);                      %Find misalignment of microscope axis 1 'axs.align(1)' with 'o*CD' subject to rotation 'rotTot'
 end
@@ -387,7 +389,7 @@ switch mode
             fprintf(' - Rotation around microscope %s: %.1f to %.1f °\n',...
                     xyzStr(axs.rot(r)),optim.LB(r),optim.UB(r));
         end
-        fprintf('-------------------------------------------------------------\n');
+        fprintf('-------------------------------------------------------------');
     case 'Optim'
         %Variable Input
         dir = varargin{1};
@@ -427,7 +429,7 @@ switch mode
         optim = varargin{7};      
         %Screen Output
         fprintf('\n-------------------------------------------------------------\n');
-        fprintf('*** Optimization results ***\n');
+        fprintf('*** Optimization results ***');
         if strcmp(optim.Alg,'ga')
             fprintf('\nOptimal parallel alignment of microscope %s with crystal direction %s:\n',...
                      xyzStr(axs.align(1)),dir.str.ax{1}{i}); 
