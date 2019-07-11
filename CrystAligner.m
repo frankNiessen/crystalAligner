@@ -20,12 +20,13 @@
 
 function [Out1,Out2,Out3] = CrystAligner()
 %function CrystAligner()
-clc; close all; warning('off','all');
+clc; close all; 
 fprintf('\n*************************************************************');
 fprintf('\n                      CrystAligner v. 1.0 \n');
 fprintf('*************************************************************\n\n');
 fprintf('\n -> Starting up MTEX ...');                                     %ScreenPrint
-try MTEXmenu; catch; startup_mtex; end                                     %Startup m-tex
+iniExtLibs;                                                                %Automatically open and initialize MTEX and check for MATLAB toolboxes
+%**************************************************************************
 %% Initialization
 fprintf('\n -> Initializing ...');                                         %ScreenPrint
 % *** General settings ***
@@ -62,6 +63,12 @@ FIB.axs.tilt = 1;                                                          %Inde
 FIB.axs.rot = 2;                                                           %Index of rotation axis in 'axs.rot'
 % *** Output
 optim.plot = 1;                                                            %Flag: Plotting [1|0]
+%**************************************************************************
+% No editing adviced beyound this line
+%
+%
+%
+%
 %% Preprocess and check Ini data
 assert(size(axs.align,1) == length(dir.ax),...
 'Number of axis-crystalDirection pairs of alignment objetives not equal'); %Check number of alignment axes and alignment objectives
@@ -90,6 +97,18 @@ Out1 = eps.opt;                                                            %Assi
 Out2 = x.opt;                                                              %Assign return value
 Out3 = oNew;                                                               %Assign return value
 fprintf('\n -> All done!\n');                                              %ScreenPrint
+end
+%% iniMtex
+function iniExtLibs
+%Initialize MTEX
+try
+    MTEXmenu;                                                              %Open m-tex menu
+catch
+    startup_mtex;                                                          %Startup m-tex
+end   
+% Check for toolboxes
+assert(logical(license('test','gads_toolbox')),'Global Optimization Toolbox not installed'); 
+assert(logical(license('test','optimization_toolbox')),'Optimization Toolbox not installed');
 end
 %% setOptimOpts - Setting optimization solver options
 function optim = setOptimOpts(crys,optim)
