@@ -52,7 +52,7 @@ axs.order =[   2       1   ];                                              %Orde
 % *** Genetic algorithm - optimization settings
 %Genetic algorithm
 optim.popSz = 500;                                                         %Population size
-optim.funcTol = 0.01;                                                      %FunctionTolerance
+optim.funcTol = 0.1;                                                       %FunctionTolerance
 optim.maxStallGen = 10;                                                    %Maximum stall generations
 optim.iterOut = 0;                                                         %Writing output for each iteration in subFolder 'iterOut'
 %Multiobjective genetic algorithm settings
