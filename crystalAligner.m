@@ -15,7 +15,7 @@
 % * MATLAB Optimization toolbox
 % * MATLAB Global optimization toolbox
 % * Optional: MATLAB Parallel Computing Toolbox
-% Tested for compatibility with MATLAB R2016b
+% Tested for compatibility with MATLAB R2104a - R2016b
 % *************************************************************************
 % Copyright 2018 Frank Niessen (see attached MIT license file)
 
@@ -217,7 +217,15 @@ for i = 1:length(dir.Mil.ax{1}) %Loop over crystal directions for parallel align
 
         fMin = @(x)minFunc2D(x,o,dirs,dir.Mil.ax{2},axs);
         % *** Run optimization *****
-        [x.ga,eps.ga] = gamultiobj(fMin,size(axs.rot,1),[],[],[],[],optim.LB,optim.UB,[],optim.opt);
+        % Checking version of Matlab
+        v = ver('Matlab');
+        y = str2double(regexp(v.Release,'\d*','Match'));
+        %% Using 'optimoptions' or 'gaoptimset' for newer and older Matlab releases
+        if y >= 2015 %Newer or equal Matlab2016a
+            [x.ga,eps.ga] = gamultiobj(fMin,size(axs.rot,1),[],[],[],[],optim.LB,optim.UB,[],optim.opt);
+        else
+            [x.ga,eps.ga] = gamultiobj(fMin,size(axs.rot,1),[],[],[],[],optim.LB,optim.UB,optim.opt);
+        end
         % Choose optimal Pareto solution
         if optim.autoSol
             scrPrnt('Solution',optim,axs);                                 %Screen Output
@@ -241,7 +249,7 @@ for i = 1:length(dir.Mil.ax{1}) %Loop over crystal directions for parallel align
         end
             % Process optimization results
         %Find out which second crystal direction was aligned      
-        rotTot = 1;
+        rotTot = rotation('Euler',0,0,0);
         for r = 1:size(axs.order,2)
             axNr = axs.order(r);
             rot(axNr) = rotation('axis',axs.rot(axNr),'angle',x.opt(axNr)*degree);     %Compute rotation around microscope rotation axis 'r' 'axs.rot(r)'
@@ -271,7 +279,7 @@ for i = 1:length(dir.Mil.ax{1}) %Loop over crystal directions for parallel align
     %Output
     scrPrnt('Result',dir,axs,x,eps,i,o,optim);                             %General results screen output
     scrPrnt('FIB_FEIHelios',x,i,FIB);                                      %Instrument specific screen output
-    rotTot = 1;                                                            %Ini
+    rotTot = rotation('Euler',0,0,0);                                                            %Ini
     for r = 1:size(axs.rot,1)  
         stgRot{i}.ax{r} = rotation('axis',xvector,'angle',x.opt(i,r)*degree);  %Convert rotation around microscoe axis r 'axs.rot(r)' to Euler angles
         rotTot = stgRot{i}.ax{r}*rotTot;                                   %Total rotation
@@ -290,7 +298,7 @@ function eps = minFunc2D(x,o,CD1,CD2,axs)
 %rotated by tilt/rotation angles around microscope axes 1 and 2 in 'axs.rot' 
 %under consideration of weighting factors 'wFac'
 warning('off','all');
-rotTot = 1;
+rotTot = rotation('Euler',0,0,0);
 for r = 1:size(axs.order,2)
     axNr = axs.order(r);
     rot(axNr) = rotation('axis',axs.rot(axNr),'angle',x(axNr)*degree);     %Compute rotation around microscope rotation axis 'r' 'axs.rot(r)'
@@ -317,7 +325,7 @@ function err = minFunc(x,o,CD,axs)
 %x: Rotation angles
 %o: Crystal orientation
 %CD: Crystal directions
-rotTot =1;
+rotTot = rotation('Euler',0,0,0);
 for r = 1:size(axs.order,2)
     axNr = axs.order(r);
     rot(axNr) = rotation('axis',axs.rot(axNr),'angle',x(axNr)*degree);     %Compute rotation around microscope rotation axis 'r' 'axs.rot(r)'
@@ -341,11 +349,14 @@ elseif strcmpi(normMode,'Matrix')
 else
    error(sprintf('Invalid normalization mode ''%s''',normMode));           %Error
 end
-M = epsNorm .*w;                                                           %Compute decision matrix
+
+for i = 1:size(epsNorm,1)
+     M(i,:) = epsNorm(i,:).*w;                                             %Compute decision matrix
+end                                                         
 Mworst = max(M,[],1);                                                      %Find maxima
 Mbest = min(M,[],1);                                                       %Find minima
-Lworst = sqrt(sum((M-Mworst)'.^2));                                        %Compute L-square-distance between M and Mworst
-Lbest = sqrt(sum((M-Mbest)'.^2));                                          %Compute L-square-distance between M and Mbest
+Lworst = sqrt(sum((M-repmat(Mworst,size(M,1),1))'.^2));                    %Compute L-square-distance between M and Mworst
+Lbest = sqrt(sum((M-repmat(Mbest,size(M,1),1))'.^2));                      %Compute L-square-distance between M and Mbest
 score = Lworst./(Lworst+Lbest);                                            %Compute score
 [~,ind] = sort(score,'descend');                                           %Rank score
 end
@@ -519,11 +530,11 @@ end
 function str = xyzStr(vec)
 %function str = xyzStr(vec)
 %vec: vector3d [xvector | yvector | zvector]
-    if ~any((vec.xyz == [1 0 0])==0)
+    if vec.x == 1 && vec.y == 0 && vec.z == 0
        str = 'X-axis';                                                     %Assign axis string
-    elseif ~any((vec.xyz == [0 1 0])==0)
+    elseif vec.x == 0 && vec.y == 1 && vec.z == 0
        str = 'Y-axis';                                                     %Assign axis string
-    elseif ~any((vec.xyz == [0 0 1])==0)
+    elseif vec.x == 0 && vec.y == 0 && vec.z == 1
        str = 'Z-axis';                                                     %Assign axis string
     else
        str = num2str(vec.xyz);     
