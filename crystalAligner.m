@@ -1,8 +1,9 @@
-%% CrystAligner.m - Crystal Alignment Tool for Electron Microscopy 
+%% crystalAligner.m - Crystal Alignment Tool for Electron Microscopy 
 % *************************************************************************
-% Script for optimized alignment of one or two crystal directions of a
-% given crystal orientation with the major coordinate axes of a scanning 
+% Script for optimized alignment of one or two crystal directions of
+% given crystal orientations with major coordinate axes of a scanning 
 % electron microscope 
+% Please find more information and examples in the attached documentation
 % *************************************************************************
 % Dr. Frank Niessen, University of Wollongong, Australia, 2018
 % contactnospam@fniessen.com (remove the nospam to make this email address 
@@ -18,14 +19,14 @@
 % *************************************************************************
 % Copyright 2018 Frank Niessen (see attached MIT license file)
 
-function [epsilon,rot,oNew] = CrystAligner()
-%function CrystAligner()
+function [epsilon,rot,oNew] = crystalAligner()
+%function crystalAligner()
 %epsilon:   Angular deviation from ideal alignment (fitness function value)
 %rot:       Stage rotation angles of optimal solution (optimal individuals of fitness function
 %oNew:      New orientation after alignment of crystal
 clc; close all; warning('off','all');
 fprintf('\n*************************************************************');
-fprintf('\n                      CrystAligner v. 1.0 \n');
+fprintf('\n                      crystalAligner v. 1.0 \n');
 fprintf('*************************************************************\n\n');
 fprintf('\n -> Starting up MTEX ...');                                     %ScreenPrint
 iniExtLibs;                                                                %Automatically open and initialize MTEX and check for MATLAB toolboxes
