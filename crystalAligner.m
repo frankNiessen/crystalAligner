@@ -239,7 +239,8 @@ for i = 1:length(dir.Mil.ax{1}) %Loop over crystal directions for parallel align
         end
         x.opt(i,:) = x.ga(ind,:);                                          %Save optimal solution
         eps.opt(i,:) = eps.ga(ind,:);                                      %Save misalignment of optimal solution
-        x.out = x.opt.*axs.sign;                                         %Adapt possible different stage rotation convention for output       
+        x.out(i,:) = x.opt(i,:).*axs.sign;                                 %Adapt possible different stage rotation convention for output  
+
         %Plot optimal solution
         if optim.plot
             h.ax = findobj('type','axes','tag','gaplotpareto');            %Find axes
@@ -271,7 +272,8 @@ for i = 1:length(dir.Mil.ax{1}) %Loop over crystal directions for parallel align
         fMin = @(x)minFunc(x,o,dirs,axs);           
         % *** Run optimization *****
         [x.opt(i,:),eps.opt(i,:)] = ga(fMin,size(axs.rot,1),[],[],[],[],optim.LB,optim.UB,[],optim.opt); %genetic algorithm
-         x.out = x.opt.*axs.sign;                                         %Adapt possible different stage rotation convention for output  
+         x.out(i,:) = x.opt(i,:).*axs.sign;                                %Adapt possible different stage rotation convention for output  
+
     else
         error('Invalid choice of optimization algorithm');                 %No valid choice of alcrys.oithm
     end
