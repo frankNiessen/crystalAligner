@@ -32,42 +32,45 @@ fprintf('\n -> Starting up MTEX ...');                                     %Scre
 iniExtLibs;                                                                %Automatically open and initialize MTEX and check for MATLAB toolboxes
 %**************************************************************************
 %% Initialization
-fprintf('\n -> Initializing ...');                                         %ScreenPrint
 % *** General settings ***
 %Crystal
-crys.o = [261 43 28; 175 20 102];                                          %Crystal orientation in Euler angles [pih1 Phi phi2] - One set for single crystal alignment [a b c], two sets for two crystals [a b c; d e f]           
-crys.cs = {'cubic','orthorhombic'};                                        %Crystal structures One set for single crystal alignment {'cubic'}, two sets for two crystals {'cubic','hexagonal'}    
-crys.ss = 'orthorhombic';                                                  %Specimen system string
+crys.o = [313 15 137];                
+crys.cs = {'cubic'};       
+crys.ss = 'orthorhombic';                                                  
 %Alignment Objective(s)
-axs.align = [xvector; zvector];                                            %Microscope axes 1 and 2 for alignment with crystal directions i.e. [0 0 1; 1 0 0], defaults: [xvector | yvector | zvector]
-dir.ax{1} = [0 1 1];                                                       %Crystal directions for alignment with microscope axis 1 'axs.align(1)' [u1 v1 w1; u2 v2 w2; ...]
-dir.ax{2} =           [0 0 1];                                             %Crystal directions for alignment with microscope axis 2 'axs.align(2)' [u1 v1 w1; u2 v2 w2; ...]
-axs.sym   = [   1        0   ];                                            %Flag: Application of crystal symmetry -  1: yes 0: no
+axs.align = [zvector];       
+dir.ax{1} = [1 1 1; 1 0 0];                                                      
+axs.sym   = [  1  ];                                             
 %SEM stage definition
-axs.rot = [xvector; zvector];                                              %Microscope axes 1 and 2 for tilt/rotation of stage i.e. [0 0 1; 1 0 0], defaults:  [xvector | yvector | zvector]
-optim.LB =[    0     -180  ];                                              %Lower bound values for rotation around microscope axes 'axs.rot' in degree
-optim.UB =[   20      180  ];                                              %Upper bound values for rotation around microscope axes 'axs.rot' in degree
-axs.sign = [   1      -1   ];                                              %Flag: Sign of axis [1] Positive (RightHand AntiClock.) [-1] Inverted (RightHand Clockwise) - for axes 'axs.rot' (accounting for different rotation conventions of different stage systems)
-axs.order =[   2       1   ];                                              %Order of rotation axes in hierarchy [2 1] -> 2nd occuring rotation and 1st occuring rotation
+axs.rot = [xvector; yvector; zvector];                                              
+optim.LB =[    0       -45    -180  ];                                              
+optim.UB =[   20        45     180  ];                                              
+axs.sign =[    1        1      -1   ];
+axs.order =[   3        1       2   ];                                               
+                                         
 % *** Genetic algorithm - optimization settings
 %Genetic algorithm
-optim.popSz = 500;                                                         %Population size
-optim.funcTol = 0.1;                                                       %FunctionTolerance
-optim.maxStallGen = 10;                                                    %Maximum stall generations
-optim.iterOut = 0;                                                         %Writing output for each iteration in subFolder 'iterOut'
+optim.popSz = 100;                                                          
+optim.funcTol = 0.01;                                                      
+optim.maxStallGen = 10;                                                    
+optim.iterOut = 0;                                                         
 %Multiobjective genetic algorithm settings
-optim.wghtFac = [1,1];                                                     %Weighting factors for TOPSIS multiobjective decision making method
-optim.multiCore = 0;                                                       %Flag: Utilization of parallel processing (switch off if errors ocur) [1|0]
-optim.hybridFcn = 0;                                                       %Flag: Use a hybrid function to (may speed op convergence but compromise diversity of solution space) [1|0]
-optim.autoSol = 1;                                                         %Flag: Pick optimum solution automatically by distance of Pareto solution from the optimal solution [1|0]
+optim.wghtFac = [1,1];                                                     optim.multiCore = 0;                                                       
+optim.hybridFcn = 0;                                                       
+optim.autoSol = 1;     
+                                                    
 % *** Optional - FIB liftout calculations
-FIB.mode = 0;                                                              %Flag: FIB liftout output [1|0]
-FIB.trench.ang = 52;                                                       %Trenching - or look-in - angle of Trench [°]
-FIB.trench.z = 15;                                                         %Trench depth 'z' [µm]
-FIB.axs.tilt = 1;                                                          %Index of tilt axis in 'axs.rot'
-FIB.axs.rot = 2;                                                           %Index of rotation axis in 'axs.rot'
+FIB.mode = 0;                                                              
+FIB.trench.ang = 52;                                                       
+FIB.trench.z = 15;                                                         
+FIB.axs.tilt = 1;                                                          
+FIB.axs.rot = 2;                                                           
 % *** Output
-optim.plot = 1;                                                            %Flag: Plotting [1|0]
+optim.plot = 1;
+
+
+
+
 %**************************************************************************
 % No editing adviced beyound this line
 %
@@ -283,7 +286,7 @@ for i = 1:length(dir.Mil.ax{1}) %Loop over crystal directions for parallel align
     scrPrnt('FIB_FEIHelios',x,i,FIB);                                      %Instrument specific screen output
     rotTot = rotation('Euler',0,0,0);                                                            %Ini
     for r = 1:size(axs.rot,1)  
-        stgRot{i}.ax{r} = rotation('axis',xvector,'angle',x.opt(i,r)*degree);  %Convert rotation around microscoe axis r 'axs.rot(r)' to Euler angles
+        stgRot{i}.ax{r} = rotation('axis',axs.rot(r),'angle',x.opt(i,r)*degree);  %Convert rotation around microscoe axis r 'axs.rot(r)' to Euler angles
         rotTot = stgRot{i}.ax{r}*rotTot;                                   %Total rotation
     end
     for c = 1:length(o)
@@ -351,10 +354,8 @@ elseif strcmpi(normMode,'Matrix')
 else
    error(sprintf('Invalid normalization mode ''%s''',normMode));           %Error
 end
-
-for i = 1:size(epsNorm,1)
-     M(i,:) = epsNorm(i,:).*w;                                             %Compute decision matrix
-end                                                         
+                                       
+M = epsNorm.*repmat(w,size(epsNorm,1),1);                                  %Compute decision matrix                                               
 Mworst = max(M,[],1);                                                      %Find maxima
 Mbest = min(M,[],1);                                                       %Find minima
 Lworst = sqrt(sum((M-repmat(Mworst,size(M,1),1))'.^2));                    %Compute L-square-distance between M and Mworst
