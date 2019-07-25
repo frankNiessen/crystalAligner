@@ -368,8 +368,8 @@ end
 %% plotting - Plotting function
 function plotting(optim,dir,oNew,crys,axs)
 if optim.plot   
-    for i = 1:length(dir.Mil.ax{1})
-        for c = 1:size(crys.o,1)
+    for c = 1:size(crys.o,1)
+        for i = 1:length(dir.Mil.ax{c})
             titleStr = sprintf('%s aligned with %s %s',xyzStr(axs.align(c)), dir.Mil.ax{c}{1}.CS.LaueName, dir.str.ax{c}{i});
             stereoProj(oNew{i}{c},dir.Mil.ax{c},dir.str.ax{c},axs.sym(c),titleStr);%Plot new crystal directions of interest for z-axis
             figure;                                                        %Create figure
