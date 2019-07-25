@@ -285,9 +285,10 @@ for i = 1:length(dir.Mil.ax{1}) %Loop over crystal directions for parallel align
     scrPrnt('Result',dir,axs,x,eps,i,o,optim);                             %General results screen output
     scrPrnt('FIB_FEIHelios',x,i,FIB);                                      %Instrument specific screen output
     rotTot = rotation('Euler',0,0,0);                                                            %Ini
-    for r = 1:size(axs.rot,1)  
-        stgRot{i}.ax{r} = rotation('axis',axs.rot(r),'angle',x.opt(i,r)*degree);  %Convert rotation around microscoe axis r 'axs.rot(r)' to Euler angles
-        rotTot = stgRot{i}.ax{r}*rotTot;                                   %Total rotation
+    for r = 1:size(axs.rot,1)
+        axNr = axs.order(r);
+        stgRot{i}.ax{axNr} = rotation('axis',axs.rot(axNr),'angle',x.opt(i,axNr)*degree);  %Convert rotation around microscoe axis r 'axs.rot(r)' to Euler angles
+        rotTot = stgRot{i}.ax{axNr}*rotTot;                                   %Total rotation
     end
     for c = 1:length(o)
         oNew{i}{c} = rotTot*o{c};                                          %Compute new crystal orientation after applied stage tilt and rotation
