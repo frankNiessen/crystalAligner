@@ -44,7 +44,7 @@ crys.sym(1)     = 1;                                                       %Appl
 crys.o(2,:)     = [175 20 102];                                            %Crystal orientation in Euler angles [pih1 Phi phi2]       
 crys.cs{2}      = 'orthorhombic';                                          %Crystal structure string (follow MTEX convention)
 crys.alignAx(2) = zvector;                                                 %Microscope axis for alignment with crystal direction/plane; Examples: zvector; [.5 .5 1]; xvector; ...
-crys.Miller{2}  = [0 0 1];                                                 %Miller indices for alignment (in Multiobjective Optimization several Miller-sets will start several optimizations);  Examples: [1 0 0; 1 1 0]; [-1 2 1]; ...
+crys.Miller{2}  = [0 0 1 1; 1  2 1 2];                                                 %Miller indices for alignment (in Multiobjective Optimization several Miller-sets will start several optimizations);  Examples: [1 0 0; 1 1 0]; [-1 2 1]; ...
 crys.type{2}    = 'hkl';                                                   %Type of Miller: 'hkl': Crystal plane; 'uvw': Crystal direction
 crys.sym(2)     = 0;                                                       %Apply crystal symmetry: 1: yes 0: no
 % ******************************* Stage ***********************************                                          
@@ -78,19 +78,12 @@ optim.plot = 1;                                                            %Plot
 %
 %
 %
-%% Preprocess and check Ini data
-%Error checking
-assert(size(crys.alignAx,2) == length(crys.Miller),...
-'Number of axis-crystalDirection pairs of alignment objetives not equal'); %Check number of alignment axes and alignment objectives
-assert(length(crys.cs) == size(crys.o,1),...
-    'Number of CrystalSystem-Orientation pairs not equal');                %Check number of crystal systems and orientations
+%% Error checking and PreProcessing
+checkerror(crys);                                                          %Error checking
+%PreProcessing
 crys.nrObj = length(crys.Miller);                                          %Number of alignment objectives
 crys.ss = 'orthorhombic';                                                  %Specimen system
-if crys.nrObj == 2
-    crys.MillerAll = unique([crys.Miller{1};crys.Miller{2}],'rows');       %All Miller indicees
-else
-    crys.MillerAll = crys.Miller{1};
-end
+crys.MillerAll = unique(vertcat(crys.Miller{:}),'rows');                   %All Miller indicees
 %% Setup Optimization options
 optim = setOptimOpts(crys,optim);                                          %Optimization initialization function
 scrPrnt('Ini',crys,stg,optim);                                             %Screen print of optimization objectives and limits parameters
@@ -115,6 +108,21 @@ end
 % Check for toolboxes
 assert(logical(license('test','gads_toolbox')),'Global Optimization Toolbox not installed'); 
 assert(logical(license('test','optimization_toolbox')),'Optimization Toolbox not installed');
+end
+%% checkError - Error checking of input data
+function checkerror(crys)
+assert(size(crys.alignAx,2) == length(crys.Miller), 'Number of axis-crystalDirection pairs of alignment objetives not equal');  %Check number of alignment axes and alignment objectives
+assert(length(crys.cs) == size(crys.o,1),'Number of CrystalSystem-Orientation pairs not equal');  %Check number of crystal systems and orientations
+%Check for different Miller notations
+for i = 1:length(crys.Miller) 
+   assert(any(strcmpi(crys.type{i},{'hkl','hkil','uvw','uvtw'})),'Please choose ''uvw'', ''uvtw'', ''hkl'' or ''hkil'' as valid Miller type');
+   assert(size(crys.Miller{i},2) == 3 || size(crys.Miller{i},2) == 4,'Only 3 or 4 Miller indicees per set allowed');
+   if size(crys.Miller{i},2) == 4 && any(strcmpi(crys.type(i),{'hkl','hkil'})) %hkil notation
+      crys.Miller{i} = crys.Miller{i}(:,[1 2 4]);
+   elseif size(crys.Miller{i},2) == 4 && any(strcmpi(crys.type(i),{'uvw','uvtw'})) %uvtw notation
+      crys.Miller{i} = [crys.Miller{i}(:,1)-crys.Miller{i}(:,3),crys.Miller{i}(:,2)-crys.Miller{i}(:,3),crys.Miller{i}(:,4)];   
+   end    
+end
 end
 %% setOptimOpts - Setting optimization solver options
 function optim = setOptimOpts(crys,optim)
