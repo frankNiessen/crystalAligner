@@ -11,11 +11,11 @@
 % Published on 11/07/2019 - version 1.0
 % *************************************************************************
 % Execution of the software requires installation of 
-% * mtex (http://mtex-toolbox.github.io/) (tested for versions 4.2.1-5.1.1)
+% * mtex (http://mtex-toolbox.github.io/)
 % * MATLAB Optimization toolbox
 % * MATLAB Global optimization toolbox
 % * Optional: MATLAB Parallel Computing Toolbox
-% Tested for compatibility with MATLAB R2104a - R2016b
+% Compatibility tested with MATLAB R2104a - R2016b and MTEX 4.2.1 to 5.1.1 
 % *************************************************************************
 % Copyright 2018 Frank Niessen (see attached MIT license file)
 
@@ -32,21 +32,20 @@ fprintf('\n -> Starting up MTEX ...');                                     %Scre
 iniExtLibs;                                                                %Automatically open and initialize MTEX and check for MATLAB toolboxes
 %**************************************************************************
 %% Initialization
-%% Example E5
 % ****************************** Crystals *********************************
 % *** Crystal Alignment Objective 1
-crys.o(1,:)     = [246.4 35.5 75];                                             %Crystal orientation in Euler angles [pih1 Phi phi2]       
-crys.cs{1}      = 'm-3m';                                                 %Crystal structure string (follow MTEX convention)
-crys.alignAx(1) = xvector;                                                 %Microscope axis for alignment with crystal direction/plane; Examples: zvector; [.5 .5 1]; xvector; ...
-crys.Miller{1}  = [0 1 1];                                                 %Miller indices for alignment (in Multiobjective Optimization several Miller-sets will start several optimizations);  Examples: [1 0 0; 1 1 0]; [-1 2 1]; ...
+crys.o(1,:)     = [61 42 9];                                               %Crystal orientation in Euler angles [pih1 Phi phi2]       
+crys.cs{1}      = 'cubic';                                                 %Crystal structure string (follow MTEX convention)
+crys.alignAx(1) = yvector;                                                 %Microscope axis for alignment with crystal direction/plane; Examples: zvector; [.5 .5 1]; xvector; ...
+crys.Miller{1}  = [1 1 3];                                                 %Miller indices for alignment (in Multiobjective Optimization several Miller-sets will start several optimizations);  Examples: [1 0 0; 1 1 0]; [-1 2 1]; ...
 crys.type{1}    = 'hkl';                                                   %Type of Miller: 'hkl': Crystal plane; 'uvw': Crystal direction
 crys.sym(1)     = 1;                                                       %Apply crystal symmetry: 1: yes 0: no
 % *** Crystal Alignment Objective 2
-crys.o(2,:)     = [90.7 94 13.1];                                          %Crystal orientation in Euler angles [pih1 Phi phi2]       
-crys.cs{2}      = 'P63/mmc';                                               %Crystal structure string (follow MTEX convention)
+crys.o(2,:)     = [61 42 9];                                               %Crystal orientation in Euler angles [pih1 Phi phi2]       
+crys.cs{2}      = 'cubic';                                                 %Crystal structure string (follow MTEX convention)
 crys.alignAx(2) = zvector;                                                 %Microscope axis for alignment with crystal direction/plane; Examples: zvector; [.5 .5 1]; xvector; ...
-crys.Miller{2}  = [1 1 -2 0];                                              %Miller indices for alignment (in Multiobjective Optimization several Miller-sets will start several optimizations);  Examples: [1 0 0; 1 1 0]; [-1 2 1]; ...
-crys.type{2}    = 'uvtw';                                                  %Type of Miller: 'hkl': Crystal plane; 'uvw': Crystal direction
+crys.Miller{2}  = [1 1 0];                                                 %Miller indices for alignment (in Multiobjective Optimization several Miller-sets will start several optimizations);  Examples: [1 0 0; 1 1 0]; [-1 2 1]; ...
+crys.type{2}    = 'hkl';                                                   %Type of Miller: 'hkl': Crystal plane; 'uvw': Crystal direction
 crys.sym(2)     = 1;                                                       %Apply crystal symmetry: 1: yes 0: no
 % ******************************* Stage ***********************************                                          
 stg.rot     = [xvector; zvector];                                          %Stage rotation axes                                        
@@ -56,7 +55,7 @@ stg.sign    = [    1      -1   ];                                          %Sign
 stg.order   = [    2      1    ];                                          %Hierarchy / order of rotation: Rotation 1 before 2 before 3; Example: [3 1 2];
 % ************************* Genetic algorithm *****************************
 %Genetic algorithm
-optim.popSz = 500;                                                         %Population size
+optim.popSz = 100;                                                         %Population size
 optim.funcTol = 0.1;                                                       %FunctionTolerance
 optim.maxStallGen = 10;                                                    %Maximum stall generations
 optim.iterOut = 0;                                                         %Writing output for each iteration in subFolder 'iterOut'
@@ -67,14 +66,13 @@ optim.hybridFcn = 0;                                                       %Flag
 optim.autoSol = 1;                                                         %Flag: Pick optimum solution automatically by distance of Pareto solution from the optimal solution [1|0]
 % ***************************** Optional **********************************
 %FIB liftout calculations
-FIB.mode = 0;                                                              %Flag: FIB liftout output [1|0]
+FIB.mode = 1;                                                              %Flag: FIB liftout output [1|0]
 FIB.trench.ang = 52;                                                       %Trenching - or look-in - angle of Trench [°]
 FIB.trench.z = 15;                                                         %Trench depth 'z' [µm]
 FIB.axs.tilt = 1;                                                          %Index of tilt axis in 'axs.rot'
 FIB.axs.rot = 2;                                                           %Index of rotation axis in 'axs.rot'                                                        
 %Output
-optim.plot = 1;                                                            %Plotting 1: On 0: Off%
-% No editing adviced beyound this line
+optim.plot = 1;                                                            %Plotting 1: On 0: Off
 %
 %
 %
@@ -460,12 +458,12 @@ switch mode
         %Screen output
         fprintf('\n*************************************************************');
         fprintf('\n Optimization problem %.0f - Parallel alignment of:\n',i);
-        fprintf('   -> %s %s direction with microscope %s\n',crys.cs{1},crys.strMil{1}{i},xyzStr(crys.alignAx(1)));
+        fprintf('   -> %s %s %s with microscope %s\n',crys.cs{1},crys.strMil{1}{i},crys.type{1},xyzStr(crys.alignAx(1)));
         if strcmp(optim.Alg,'gamultiobj')
            if size(crys.Miller{2},1)==1
-               fprintf('   -> %s %s direction with microscope %s\n',crys.cs{2},num2str(crys.Miller{2}'),xyzStr(crys.alignAx(2))); 
+               fprintf('   -> %s %s %s with microscope %s\n',crys.cs{2},num2str(crys.Miller{2}'),crys.type{2},xyzStr(crys.alignAx(2))); 
            else
-               fprintf('   -> Either of %s directions with microscope %s\n',crys.oMil{2}{1}.CS.LaueName, num2str(crys.Miller{2}'),xyzStr(crys.alignAx(2)));  
+               fprintf('   -> Either of %s %ss with microscope %s\n',crys.oMil{2}{1}.CS.LaueName,crys.type{2}, num2str(crys.Miller{2}'),xyzStr(crys.alignAx(2)));  
            end
         end
         fprintf('*************************************************************\n\n');
@@ -492,11 +490,11 @@ switch mode
         fprintf('\n-------------------------------------------------------------\n');
         fprintf('*** Optimization results ***');
         if strcmp(optim.Alg,'ga')
-            fprintf('\nOptimal parallel alignment of\n\t-microscope %s with crystal direction %s:\n',...
-                     xyzStr(crys.alignAx(1)),crys.strMil{1}{i}); 
+            fprintf('\nOptimal parallel alignment of\n\t-microscope %s with crystal %s %s:\n',...
+                     xyzStr(crys.alignAx(1)),crys.type{1},crys.strMil{1}{i}); 
         elseif strcmp(optim.Alg,'gamultiobj')
-            fprintf('\nOptimal parallel alignment of\n\t- microscope %s with %s crystal direction %s and \n\t- microscope %s with %s crystal direction %s:\n',...
-                     xyzStr(crys.alignAx(1)),crys.cs{1},crys.strMil{1}{i},xyzStr(crys.alignAx(2)),crys.cs{2},crys.str.optAx); 
+            fprintf('\nOptimal parallel alignment of\n\t- microscope %s with %s crystal %s %s and \n\t- microscope %s with %s crystal %s %s:\n',...
+                     xyzStr(crys.alignAx(1)),crys.cs{1},crys.type{1},crys.strMil{1}{i},xyzStr(crys.alignAx(2)),crys.cs{2},crys.type{2},crys.str.optAx); 
         end
         
         for r = 1:size(stg.rot,1)
