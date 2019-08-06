@@ -38,14 +38,14 @@ crys.o(1,:)     = [61 42 9];                                               %Crys
 crys.cs{1}      = 'cubic';                                                 %Crystal structure string (follow MTEX convention)
 crys.alignAx(1) = yvector;                                                 %Microscope axis for alignment with crystal direction/plane; Examples: zvector; [.5 .5 1]; xvector; ...
 crys.Miller{1}  = [1 1 3];                                                 %Miller indices for alignment (in Multiobjective Optimization several Miller-sets will start several optimizations);  Examples: [1 0 0; 1 1 0]; [-1 2 1]; ...
-crys.type{1}    = 'hkl';                                                   %Type of Miller: 'hkl': Crystal plane; 'uvw': Crystal direction
+crys.type{1}    = 'uvw';                                                   %Type of Miller: 'hkl': Crystal plane; 'uvw': Crystal direction
 crys.sym(1)     = 1;                                                       %Apply crystal symmetry: 1: yes 0: no
 % *** Crystal Alignment Objective 2
 crys.o(2,:)     = [61 42 9];                                               %Crystal orientation in Euler angles [pih1 Phi phi2]       
 crys.cs{2}      = 'cubic';                                                 %Crystal structure string (follow MTEX convention)
 crys.alignAx(2) = zvector;                                                 %Microscope axis for alignment with crystal direction/plane; Examples: zvector; [.5 .5 1]; xvector; ...
 crys.Miller{2}  = [1 1 0];                                                 %Miller indices for alignment (in Multiobjective Optimization several Miller-sets will start several optimizations);  Examples: [1 0 0; 1 1 0]; [-1 2 1]; ...
-crys.type{2}    = 'hkl';                                                   %Type of Miller: 'hkl': Crystal plane; 'uvw': Crystal direction
+crys.type{2}    = 'uvw';                                                   %Type of Miller: 'hkl': Crystal plane; 'uvw': Crystal direction
 crys.sym(2)     = 1;                                                       %Apply crystal symmetry: 1: yes 0: no
 % ******************************* Stage ***********************************                                          
 stg.rot     = [xvector; zvector];                                          %Stage rotation axes                                        
