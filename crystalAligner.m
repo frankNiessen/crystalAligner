@@ -49,10 +49,10 @@ crys.type{2}    = 'uvw';                                                   %Type
 crys.sym(2)     = 1;                                                       %Apply crystal symmetry: 1: yes 0: no
 % ******************************* Stage ***********************************                                          
 stg.rot     = [xvector; zvector];                                          %Stage rotation axes                                        
-stg.LB      = [    0     -180  ];               s                           %Lower bound [°]
+stg.LB      = [    0     -180  ];                                          %Lower bound [°]
 stg.UB      = [   20      180  ];                                          %Upper bound [°]                                         
 stg.sign    = [    1      -1   ];                                          %Sign 1: Right hand rule convention; -1: Left hand rule convention
-stg.order   = [    2      1    ];                                          %Hierarchy / order of rotation: Apply rotation 1 before 2 before 3; Example: [1 2 3];
+stg.order   = [    2      1    ];                                          %Hierarchy / order of rotation: Apply rotation around axis 2 and then 1; Example: [2 1];
 % ************************* Genetic algorithm *****************************
 %Genetic algorithm
 optim.popSz = 100;                                                         %Population size
