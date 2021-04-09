@@ -29,16 +29,22 @@ To run **crystalAligner** open **MATLAB**, navigate to one of the example script
 It is easiest to follow the [examples](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-scripts) to learn how to use **crystalAligner**. However, when working on your own crystal systems, orientations, alignment objectives and microscopes you will need to know how to set up **crystalAligner** properly. I will therefore go through all parameters that can be defined in the header of the [example scripts](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-scripts).
 
 #### Crystal alignment objective
-This section specified the crystal and specimen symmetries, the orientation of your crystal, and of course the crystal directions and microscope axes that should be aligned in the optimization problem. You can define one or two alignment objectives, which are stored in the cell arrays *crys{1}* and *crys{2}*, respectively. Let's look at the fields that need to be specified:
+This section specifies the crystal and specimen symmetries, the orientation of your crystal, and of course the crystal directions and microscope axes that should be aligned in the optimization problem. You can define one or two alignment objectives, which are stored in the cell arrays *crys{1}* and *crys{2}*, respectively. Let's look at the fields that need to be specified:
 
 - *SS*: This is the specimen symmetry, which can be specified as 'triclinic' or 'orthorhombic' by the MTEX command [specimenSymmetry](https://mtex-toolbox.github.io/specimenSymmetry.specimenSymmetry.html). 
 - *CS*: This is the crystal symmetry, which needs a point group as an input. Here we also name the crystal symmetry by specifying the option 'mineral'. This is done with the MTEX command [specimenSymmetry](https://mtex-toolbox.github.io/crystalSymmetry.crystalSymmetry.html). In the case where not all unit axes have the same length, it is also important to state the unit vector lengths when defining the crystal symmetry.
 - *ori*: This is the crystal orientation. It uses the specimen and crystal symmetry as an input. The crystal orientation is usually defined by a set of three Euler angles, which can readily be extracted from EBSD data. There are however plenty of different ways of defining an [orientation](https://mtex-toolbox.github.io/orientation.orientation.html) in MTEX, which you are welcome to use as well.
-- *alignAx*: This is a direction in the specimen coordinate system which is defined as a [vector3d](https://mtex-toolbox.github.io/vector3d.vector3d.html) instance in MTEX. In the most common cases you will want to align your crystal with the x, y or z directions of your crystals, in which case you can use the global MTEX variables *xvector*, *yvector* and *zvector*.
--  *Miller*: This specifies the crystal direction of crystal plane normal that should be aligned. In MTEX, this is done by using the [Miller](https://mtex-toolbox.github.io/Miller.Miller.html) object. The object simply requires the *Miller* indicees, the crystal and specimen symmetries, as well as the option 'hkl' or 'uvw' to specify plane normals or directions, respectively. In the case of *Miller-Bravais* notation using four indecees, the *hkil* or *UVTW* are valid options to declare crystal plane normals or directions, respectively.
-At last we set the option *Miller.opt.useSym* to *true* if we want to use the symmetrically equivalent directions or *false* if we only want to consider the specific direction.
+- *alignAx*: This is a direction in the specimen coordinate system which is defined as a [vector3d](https://mtex-toolbox.github.io/vector3d.vector3d.html) instance in MTEX. In the most common cases you will want to align your crystal with the x, y or z directions of your microscope, in which case you can use the global MTEX variables *xvector*, *yvector* and *zvector*.
+-  *Miller*: This specifies the crystal direction of crystal plane normal that should be aligned. In MTEX, this is done by using the [Miller](https://mtex-toolbox.github.io/Miller.Miller.html) object. The object simply requires the *Miller* indicees, the crystal and specimen symmetries, as well as the option 'hkl' or 'uvw' to specify plane normals or directions, respectively. In the case of *Miller-Bravais* notation using four indecees, the *hkil* or *UVTW* are valid options to declare crystal plane normals or directions, respectively. You can define multiple crystal directions by concatenating Miller objects like [Miller1,Miller2,Miller3]. This will sequentially solve multiple optimization problems and is only allowd for the first optimization objective. At last we set the option *Miller.opt.useSym* to *true* if we want to use the symmetrically equivalent directions or *false* if we only want to consider the specific direction.
 
+#### Stage
+This section specifies the rotation axes and limits of the rotation stage. The settings in the [example scripts](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-scripts) work for a standard FEI SEM-stage (no warranty - double-check!). The settings in the *stg* structure should enable you to model any microscopy stage. These are the parameters we need to specify:
 
+**TO BE FINISHED NEXT WEEK**
+
+#### Optional
+
+**TO BE FINISHED NEXT WEEK**
 
 ## Example scripts
 
