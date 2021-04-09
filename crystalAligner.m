@@ -1,4 +1,26 @@
 %% crystalAligner.m - Crystal Alignment Tool for Electron Microscopy
+% Edits - Vivian Tong, NPL, 20210408
+% % (1) more flexible input classes in function defOri(crys,optim) 
+% % option to use mtex objects directly as input for cs, ss, o, and Miller
+%   % needed to add an input option for crys.o as a cell array to accomodate this
+    % the old style inputs should still work
+    % old style: crys.o(c,:) = [crys.o(c,1) crys.o(c,2) crys.o(c,3)]; %euler ang inputs
+    % new style: crys.o{c} = [eul1 eul2 eul3];
+    % (needed to adjust some inputs in scrPrnt() to help this)
+% % (2) Changed output angles to reflect sign of microscope rotation in scrPrnt(mode,varargin)
+  % this is better if you want to type in stage rotation angles to the SEM
+  % software, but less convenient for constructing a rotation matrix from
+  % your outputs
+  % old code:
+%             fprintf('   -> Rotation around microscope %s: %.1fï¿½\n',...
+%                  xyzStr(stg.rot(r)), x.out(i,r));
+ % new code:
+%             fprintf('   -> Rotation around microscope %s: %.1fï¿½\n',...
+%                  xyzStr(stg.rot(r)), x.out(i,r)*stg.sign(r));
+    
+% % more flexible input classes in function defOri(crys,optim) (line ~193)
+% % Now you can use mtex objects directly as input variables if you want
+    
 % *************************************************************************
 % Script for optimized alignment of one or two crystal directions of
 % given crystal orientations with major coordinate axes of a scanning
@@ -30,7 +52,7 @@ function [epsilon,rot,oNew] = crystalAligner()
 %epsilon:   Angular deviation from ideal alignment (fitness function value)
 %rot:       Stage rotation angles of optimal solution (optimal individuals of fitness function
 %oNew:      New orientation after alignment of crystal
-clc; close all; warning('off','all');
+close all; home; warning('off','all');
 fprintf('\n*************************************************************');
 fprintf('\n                      crystalAligner v. 1.0 \n');
 fprintf('*************************************************************\n\n');
@@ -38,31 +60,35 @@ fprintf('\n -> Starting up MTEX ...');                                     %Scre
 iniExtLibs;                                                                %Automatically open and initialize MTEX and check for MATLAB toolboxes
 %**************************************************************************
 %% Initialization
-%% Example E3
+%% Example E5B
+%Concurrent alignment of the {011} plane normals and <11-20> crystal 
+%directions in a cubic and a hexagonal crystal with the x-Axis and z-Axis 
+%of the microscope, respectively.
 % ****************************** Crystals *********************************
+crys.ss = 'orthorhombic';
 % *** Crystal Alignment Objective 1
-crys.o(1,:)     = [261 43 28];                                             %Crystal orientation in Euler angles [pih1 Phi phi2]
-crys.cs{1}      = 'cubic';                                                 %Crystal structure string (follow MTEX convention)
+crys.o{1}     = [246 36 75];                                             %Crystal orientation in Euler angles [pih1 Phi phi2]       
+crys.cs{1}      = crystalSymmetry('6/mmm', [2.9065 2.9065 2.8366], 'X||a*', 'Y||b', 'Z||c*', 'mineral', 'W C');                                                  %Crystal structure string (follow MTEX convention)
 crys.alignAx(1) = xvector;                                                 %Microscope axis for alignment with crystal direction/plane; Examples: zvector; [.5 .5 1]; xvector; ...
-crys.Miller{1}  = [0 1 1];                                                 %Miller indices for alignment (in Multiobjective Optimization several Miller-sets will start several optimizations);  Examples: [1 0 0; 1 1 0]; [-1 2 1]; ...
-crys.type{1}    = 'uvw';                                                   %Type of Miller: 'hkl': Crystal plane; 'uvw': Crystal direction
+crys.Miller{1}  = [1 0 -1 1; 1 1 -2 0];                                                 %Miller indices for alignment (in Multiobjective Optimization several Miller-sets will start several optimizations);  Examples: [1 0 0; 1 1 0]; [-1 2 1]; ...
+crys.type{1}    = 'hkil';                                                   %Type of Miller: 'hkl': Crystal plane; 'uvw': Crystal direction
 crys.sym(1)     = 1;                                                       %Apply crystal symmetry: 1: yes 0: no
 % *** Crystal Alignment Objective 2
-crys.o(2,:)     = [175 20 102];                                            %Crystal orientation in Euler angles [pih1 Phi phi2]
-crys.cs{2}      = 'orthorhombic';                                          %Crystal structure string (follow MTEX convention)
+crys.cs{2}      = 'cubic';                                               %Crystal structure string (follow MTEX convention)
 crys.alignAx(2) = zvector;                                                 %Microscope axis for alignment with crystal direction/plane; Examples: zvector; [.5 .5 1]; xvector; ...
-crys.Miller{2}  = [0 0 1];                                                 %Miller indices for alignment (in Multiobjective Optimization several Miller-sets will start several optimizations);  Examples: [1 0 0; 1 1 0]; [-1 2 1]; ...
-crys.type{2}    = 'uvw';                                                   %Type of Miller: 'hkl': Crystal plane; 'uvw': Crystal direction
-crys.sym(2)     = 0;                                                       %Apply crystal symmetry: 1: yes 0: no
-% ******************************* Stage ***********************************
-stg.rot     = [xvector; zvector];                                          %Stage rotation axes
-stg.LB      = [    0     -180  ];                                          %Lower bound [�]
-stg.UB      = [   20      180  ];                                          %Upper bound [�]
+crys.Miller{2}  = [1 1 0];                                              %Miller indices for alignment (in Multiobjective Optimization several Miller-sets will start several optimizations);  Examples: [1 0 0; 1 1 0]; [-1 2 1]; ...
+crys.o{2}     = orientation(rotation('Euler',20,30,10,'Bunge'),crys.cs{2}, crys.ss);                                              %Crystal orientation in Euler angles [pih1 Phi phi2]       
+crys.type{2}    = 'uvw';                                                  %Type of Miller: 'hkl': Crystal plane; 'uvw': Crystal direction
+crys.sym(2)     = 1;                                                       %Apply crystal symmetry: 1: yes 0: no
+% ******************************* Stage ***********************************                                          
+stg.rot     = [xvector; zvector];                                          %Stage rotation axes                                        
+stg.LB      = [    0    57  ];                                          %Lower bound [°]
+stg.UB      = [   20    57  ];                                          %Upper bound [°]                                         
 stg.sign    = [    1      -1   ];                                          %Sign 1: Right hand rule convention; -1: Left hand rule convention
 stg.order   = [    2      1    ];                                          %Hierarchy / order of rotation: Rotation 1 before 2 before 3; Example: [3 1 2];
 % ************************* Genetic algorithm *****************************
 %Genetic algorithm
-optim.popSz = 500;                                                         %Population size
+optim.popSz = 200;                                                         %Population size
 optim.funcTol = 0.1;                                                       %FunctionTolerance
 optim.maxStallGen = 10;                                                    %Maximum stall generations
 optim.iterOut = 0;                                                         %Writing output for each iteration in subFolder 'iterOut'
@@ -70,21 +96,32 @@ optim.iterOut = 0;                                                         %Writ
 optim.wghtFac = [1,1];                                                     %Weighting factors for TOPSIS multiobjective decision making method
 optim.multiCore = 0;                                                       %Flag: Utilization of parallel processing (switch off if errors ocur) [1|0]
 optim.hybridFcn = 0;                                                       %Flag: Use a hybrid function to (may speed op convergence but compromise diversity of solution space) [1|0]
-optim.autoSol = 1;                                                         %Flag:
-%
-%
-%
+optim.autoSol = 1;                                                         %Flag: Pick optimum solution automatically by distance of Pareto solution from the optimal solution [1|0]
+% ***************************** Optional **********************************
+%FIB liftout calculations
+FIB.mode = 0;                                                              %Flag: FIB liftout output [1|0]
+FIB.trench.ang = 52;                                                       %Trenching - or look-in - angle of Trench [°]
+FIB.trench.z = 15;                                                         %Trench depth 'z' [µm]
+FIB.axs.tilt = 1;                                                          %Index of tilt axis in 'axs.rot'
+FIB.axs.rot = 2;                                                           %Index of rotation axis in 'axs.rot'                                                        
+%Output
+optim.plot = 1;                                                            %Plotting 1: On 0: Off%
+
+
 %% Error checking and PreProcessing
 crys = checkerror(crys);                                                   %Error checking
 %PreProcessing
 crys.nrObj = length(crys.Miller);                                          %Number of alignment objectives
-crys.ss = 'orthorhombic';                                                  %Specimen system
-crys.MillerAll = unique(vertcat(crys.Miller{:}),'rows');                   %All Miller indicees
+if ~isfield(crys,'ss') %if it wasn't already defined
+    crys.ss = 'orthorhombic';                                                  %Specimen system
+end
+% I think this variable isn't used???
+% crys.MillerAll = unique(vertcat(crys.Miller{:}),'rows');                   %All Miller indicees
 %% Setup Optimization options
 optim = setOptimOpts(crys,optim);                                          %Optimization initialization function
-scrPrnt('Ini',crys,stg,optim);                                             %Screen print of optimization objectives and limits parameters
 %% Define Crystal system, orientation and crystal directions in mtex & Plot orientations
 [o,cs,ss,crys] = defOri(crys,optim);                                       %Orientation definition function
+scrPrnt('Ini',crys,stg,optim);                                             %Screen print of optimization objectives and limits parameters
 %% Optimization - Multiobjective genetic algorithm
 [oNew,stgRot,x,eps] = runOptim(crys,stg,optim,o,FIB,ss);                    %Optimization function
 %% Plot stereographic projection and inverse polefigure of aligned equivalent crystal directions
@@ -107,20 +144,28 @@ assert(logical(license('test','optimization_toolbox')),'Optimization Toolbox not
 end
 %% checkError - Error checking of input data
 function crys = checkerror(crys)
-assert(size(crys.alignAx,2) == length(crys.Miller), 'Number of axis-crystalDirection pairs of alignment objetives not equal');  %Check number of alignment axes and alignment objectives
-assert(length(crys.cs) == size(crys.o,1),'Number of CrystalSystem-Orientation pairs not equal');  %Check number of crystal systems and orientations
-%Check for different Miller notations
-for i = 1:length(crys.Miller)
-   assert(any(strcmpi(crys.type{i},{'hkl','hkil','uvw','uvtw'})),'Please choose ''uvw'', ''uvtw'', ''hkl'' or ''hkil'' as valid Miller type');
-   assert(size(crys.Miller{i},2) == 3 || size(crys.Miller{i},2) == 4,'Only 3 or 4 Miller indicees per set allowed');
-   if size(crys.Miller{i},2) == 4 && any(strcmpi(crys.type(i),{'hkl','hkil'})) %hkil notation
-      crys.Miller{i} = crys.Miller{i}(:,[1 2 4]);
-      crys.type{i} = 'hkl';
-   elseif size(crys.Miller{i},2) == 4 && any(strcmpi(crys.type(i),{'uvw','uvtw'})) %uvtw notation
-      crys.Miller{i} = [crys.Miller{i}(:,1)-crys.Miller{i}(:,3),crys.Miller{i}(:,2)-crys.Miller{i}(:,3),crys.Miller{i}(:,4)];
-      crys.type{i} = 'uvw';
-   end
+assert(length(crys.alignAx) == length(crys.Miller), 'Number of axis-crystalDirection pairs of alignment objetives not equal');  %Check number of alignment axes and alignment objectives
+if isa(crys.o,'cell')
+    assert(length(crys.cs) == length(crys.o),'Number of CrystalSystem-Orientation pairs not equal');  %Check number of crystal systems and orientations
+else
+    assert(length(crys.cs) == size(crys.o,1),'Number of CrystalSystem-Orientation pairs not equal');  %Check number of crystal systems and orientations
 end
+%Check for different Miller notations
+% safer to handle this natively in MTEX!!!
+% edited defOri() to handle this
+% %{
+% for i = 1:length(crys.Miller)
+%    assert(any(strcmpi(crys.type{i},{'hkl','hkil','uvw','uvtw'})),'Please choose ''uvw'', ''uvtw'', ''hkl'' or ''hkil'' as valid Miller type');
+%    assert(size(crys.Miller{i},2) == 3 || size(crys.Miller{i},2) == 4,'Only 3 or 4 Miller indicees per set allowed');
+%    if size(crys.Miller{i},2) == 4 && any(strcmpi(crys.type(i),{'hkl','hkil'})) %hkil notation
+%       crys.Miller{i} = crys.Miller{i}(:,[1 2 4]);
+%       crys.type{i} = 'hkl';
+%    elseif size(crys.Miller{i},2) == 4 && any(strcmpi(crys.type(i),{'uvw','uvtw'})) %uvtw notation
+%       crys.Miller{i} = [crys.Miller{i}(:,1)-crys.Miller{i}(:,3),crys.Miller{i}(:,2)-crys.Miller{i}(:,3),crys.Miller{i}(:,4)];
+%       crys.type{i} = 'uvw';
+%    end
+% end
+% %}
 end
 %% setOptimOpts - Setting optimization solver options
 function optim = setOptimOpts(crys,optim)
@@ -183,36 +228,115 @@ end
 %% function defOri - Defining and plotting of orientations
 function [o,cs,ss,crys] = defOri(crys,optim)
 fprintf('\n -> Defining crystal system, orientation and directions ...');  %ScreenPrint
-ss = crystalSymmetry(crys.ss);                                             %Define Specimen system
-for c = 1:size(crys.o,1) %Loop over crystals
-    cs{c} = crystalSymmetry(crys.cs{c});                                   %Define Crystal system
-    o{c} =  orientation('Euler',crys.o(c,1)*degree,crys.o(c,2)*degree,...
-                                crys.o(c,3)*degree,cs{c},ss);              %Compute crystal orientation
-    %Define Miller planes or directions
-    for i = 1:size(crys.Miller{c},1) %Loop over Miller indicee sets
-        crys.oMil{c}{i} = Miller(crys.Miller{c}(i,1),crys.Miller{c}(i,2),...
-                                 crys.Miller{c}(i,3),cs{c},crys.type{c});  %Create Miller indexed direction
-        crys.strMil{c}{i} = regexprep(num2str(round(...
-                                      crys.oMil{c}{i}.(crys.type{c}))),'\s+',''); %Save Miller labels
+
+for c = 1:length(crys.cs) %Loop over crystals
+    %Define Specimen system
+    if isa(crys.ss,'crystalSymmetry')
+        ss = crys.ss;
+        crys.ss=ss.lattice.char; %overwrite crys.cs to maintain compatibility
+    elseif isa(crys.ss,'char')
+        ss = crystalSymmetry(crys.ss);
+    else
+        warning(['Wrong input type for specimen symmetry in crystal '...
+            num2str(c) '? I should be either a character string or a mtex crystalSymmetry object.'...
+            'using default orthorhombic specimen symmetry!']);
+        ss = crystalSymmetry('orthorhombic');
     end
+    
+    %Define Crystal system
+    if isa(crys.cs{c},'crystalSymmetry')
+        cs{c} = crys.cs{c};
+        crys.cs{c}=cs{c}.lattice.char; %overwrite crys.cs to maintain compatibility
+    elseif isa(crys.cs{c},'char')
+        cs{c} = crystalSymmetry(crys.cs{c});
+    else
+        warning(['Wrong input type for crystal symmetry in crystal '...
+            num2str(c) '? I should be either a character string or a mtex crystalSymmetry object.'...
+            'using default cubic crystal symmetry!']);
+        cs{c} = crystalSymmetry('cubic');
+    end
+    
+    %Define crystal orientation
+    if isa(crys.o,'cell') && isa(crys.o{c},'orientation')                                  % mtex orientation object - direct copy
+        o{c} = crys.o{c};
+        crys.o{c}=[o{c}.phi1 o{c}.Phi o{c}.phi2];                                           %overwrite crys.o to maintain compatibility
+    elseif isa(crys.o,'cell') && isa(crys.o{c},'numeric') && length(crys.o{c})==3          % cell array of euler angle triplets
+        o{c} =  orientation('Euler',crys.o{c}(1)*degree,crys.o{c}(2)*degree,...
+            crys.o{c}(3)*degree,cs{c},ss);
+    elseif isa(crys.o,'numeric')  && size(crys.o,2)==3                                     % numeric array of euler angles
+        o{c} =  orientation('Euler',crys.o(c,1)*degree,crys.o(c,2)*degree,...
+            crys.o(c,3)*degree,cs{c},ss);              %Compute crystal orientation
+    else
+        warning(['Wrong input type for orientation in crystal '...
+            num2str(c) '? I should be a cell array of 3-number vectors (eul angs), '...
+            'a c*3 matrix of numbers (eul angs), or a mtex orientation object'.'...
+            'using default euler angles [0 0 0]!']);
+        o{c} =  orientation('Euler',0,0,0,cs{c},ss);
+    end
+    
+    %Define Miller planes or directions
+    % if crys.Miller{c} is a cell array of either mtex miller objects, or numeric vectors
+    if isa(crys.Miller{c},'cell')                           
+        for i = 1:length(crys.Miller{c})                       %Loop over Miller indicee sets
+            if isa(crys.Miller{c}{i},'Miller')                 % mtex miller object - direct copy
+                
+                crys.oMil{c}{i} = crys.Miller{c}{i};
+                crys.strMil{c}{i} = regexprep(num2str(round(...
+                    crys.oMil{c}{i}.(crys.type{c}))),'\s+',''); %Save Miller labels
+                crys.Miller{c}{i}=crys.Miller{c}{i}.(crys.type{c});                      %overwrite crys.Miller to maintain compatibility 
+            elseif isa(crys.Miller{c}{i},'numeric') && length(crys.Miller{c}{i})==3   % 3-ix miller
+                
+                crys.oMil{c}{i} = Miller(crys.Miller{c}{i}(1),crys.Miller{c}{i}(2),...
+                    crys.Miller{c}{i}(3),cs{c},crys.type{c});  %Create Miller indexed direction
+                crys.strMil{c}{i} = regexprep(num2str(round(...
+                    crys.oMil{c}{i}.(crys.type{c}))),'\s+',''); %Save Miller labels
+                
+            elseif isa(crys.Miller{c}{i},'numeric') && length(crys.Miller{c}{i})==4   % 4-ix miller
+                
+                crys.oMil{c}{i} = Miller(crys.Miller{c}{i}(1),crys.Miller{c}{i}(2),...
+                    crys.Miller{c}{i}(3),crys.Miller{c}{i}(4),cs{c},crys.type{c});  %Create Miller indexed direction
+                crys.strMil{c}{i} = regexprep(num2str(round(...
+                    crys.oMil{c}{i}.(crys.type{c}))),'\s+',''); %Save Miller labels
+            end
+            error(['Wrong input type for miller indices in crystal ' num2str(c) ', vector ' num2str(i)]);
+        end
+    % if crys.Miller{c} is a numeric vector of miller indices
+    elseif isa(crys.Miller{c},'numeric')                       
+        for i = 1:size(crys.Miller{c},1) %Loop over Miller indicee sets
+            if size(crys.Miller{c},2)==3 %3-index notation
+                crys.oMil{c}{i} = Miller(crys.Miller{c}(i,1),crys.Miller{c}(i,2),...
+                    crys.Miller{c}(i,3),cs{c},crys.type{c});  %Create Miller indexed direction
+                crys.strMil{c}{i} = regexprep(num2str(round(...
+                    crys.oMil{c}{i}.(crys.type{c}))),'\s+',''); %Save Miller labels
+            elseif  size(crys.Miller{c},2)==4 %4 index notation
+                crys.oMil{c}{i} = Miller(crys.Miller{c}(i,1),crys.Miller{c}(i,2),...
+                    crys.Miller{c}(i,3),crys.Miller{c}(i,4),cs{c},crys.type{c});  %Create Miller indexed direction
+                crys.strMil{c}{i} = regexprep(num2str(round(...
+                    crys.oMil{c}{i}.(crys.type{c}))),'\s+',''); %Save Miller labels
+            else
+                error(['Wrong input type for miller indices in crystal ' num2str(c) ', vector ' num2str(i)]);
+            end
+        end
+    end
+    
 end
 
 % *** Plot stereographic projection and inverse polefigure of equivalent crystal directions
 % Reference frame is stage coordinate system C_s or equivalently microscope
-% coordinate system C_m for 0� stage tilt, no pre-tilt and no change in
+% coordinate system C_m for 0ï¿½ stage tilt, no pre-tilt and no change in
 % rotation with respect to the orientation measurement
 if optim.plot
     for c = 1:size(crys.o,1)
         fprintf(['\n -> Plotting stereographic projections and IPF of',...
-                 ' crystal %.0f ...'],c);                                   %ScreenPrint
+            ' crystal %.0f ...'],c);                                   %ScreenPrint
         stereoProj(o{c},crys.oMil{c},crys.strMil{c},crys.sym(c),...
-                   sprintf('Original orientation %.0f',c));                %Plot stereographic projection of equivalent crystal directions of crystal orientation 'o'
+            sprintf('Original orientation %.0f',c));                %Plot stereographic projection of equivalent crystal directions of crystal orientation 'o'
         figure;                                                            %Create figure
         plotIPDF(o{c},[xvector,yvector,zvector],'antipodal',...
-                 'MarkerFaceColor','k');                                   %Plot inverse pole-figure (IPF) [x:(100), y:(010) and z:(001)]
+            'MarkerFaceColor','k');                                   %Plot inverse pole-figure (IPF) [x:(100), y:(010) and z:(001)]
         set(gcf,'name',sprintf('Original orientation %.0f',c));
     end
-tileFigs();                                                                %Sort figures
+    tileFigs();                                                                %Sort figures
 end
 end
 
@@ -246,7 +370,7 @@ for i = 1:length(crys.oMil{1}) %Loop over crystal directions
             ind = ind(1);                                                  %Take best solution
         else
              ind = listdlg('PromptString',...
-                    'Choose a Pareto-solution: ax{1}[�] ax{2}[�] eps1[�] eps2[�]:',...
+                    'Choose a Pareto-solution: ax{1}[ï¿½] ax{2}[ï¿½] eps1[ï¿½] eps2[ï¿½]:',...
                      'liststring',num2str([x.ga,eps.ga]),...
                      'SelectionMode','single','ListSize',[300,250]);       %Choose Pareto-solution manually
         end
@@ -439,11 +563,11 @@ switch mode
         for i = 1:size(crys.alignAx,2)
            if crys.sym(i); sym=''; else; sym = '(NoSymmetry)'; end
            fprintf(' - Microscope %s with %s crystal %s: \t%s %s\n',...
-                xyzStr(crys.alignAx(i)),crys.cs{i},crys.type{i},num2str(crys.Miller{i}'),sym);
+                xyzStr(crys.alignAx(i)),crys.cs{i},crys.type{i},reshape(char(crys.strMil{i})',1,[]),sym);
         end
         fprintf('Rotational degrees of freedom:\n');
         for r = 1:size(stg.rot,1)
-            fprintf(' - Rotation around microscope %s: %.1f to %.1f �\n',...
+            fprintf(' - Rotation around microscope %s: %.1f to %.1f ï¿½\n',...
                     xyzStr(stg.rot(r)),stg.LB(r),stg.UB(r));
         end
         fprintf('-------------------------------------------------------------');
@@ -458,9 +582,9 @@ switch mode
         fprintf('   -> %s %s %s with microscope %s\n',crys.cs{1},crys.strMil{1}{i},crys.type{1},xyzStr(crys.alignAx(1)));
         if strcmp(optim.Alg,'gamultiobj')
            if size(crys.Miller{2},1)==1
-               fprintf('   -> %s %s %s with microscope %s\n',crys.cs{2},num2str(crys.Miller{2}'),crys.type{2},xyzStr(crys.alignAx(2)));
+               fprintf('   -> %s %s %s with microscope %s\n',crys.cs{2},char(crys.strMil{2}),crys.type{2},xyzStr(crys.alignAx(2)));
            else
-               fprintf('   -> Either of %s %ss with microscope %s\n',crys.oMil{2}{1}.CS.LaueName,crys.type{2}, num2str(crys.Miller{2}'),xyzStr(crys.alignAx(2)));
+               fprintf('   -> Either of %s %ss with microscope %s\n',crys.oMil{2}{1}.CS.LaueName,crys.type{2},char(crys.strMil{2}),xyzStr(crys.alignAx(2)));
            end
         end
         fprintf('*************************************************************\n\n');
@@ -495,13 +619,13 @@ switch mode
         end
 
         for r = 1:size(stg.rot,1)
-            fprintf('   -> Rotation around microscope %s: %.1f�\n',...
-                 xyzStr(stg.rot(r)), x.out(i,r));
+            fprintf('   -> Rotation around microscope %s: %.1fï¿½\n',...
+                 xyzStr(stg.rot(r)), x.out(i,r)*stg.sign(r));
         end
-        fprintf('   -> Deviation from ideal alignment in %s: %0.1f �\n',...
+        fprintf('   -> Deviation from ideal alignment in %s: %0.1f ï¿½\n',...
                  xyzStr(crys.alignAx(1)),eps.opt(i,1));
          if size(eps.opt,2) == 2
-             fprintf('   -> Deviation from ideal alignment in %s: %0.1f �\n',...
+             fprintf('   -> Deviation from ideal alignment in %s: %0.1f ï¿½\n',...
                  xyzStr(crys.alignAx(2)),eps.opt(i,2));
          end
          fprintf('-------------------------------------------------------------\n');
@@ -523,15 +647,15 @@ switch mode
             %Screen output
             fprintf('*** FIB - FEI Helios ***\n');
             fprintf('Apply:\n');
-            fprintf('   -> Relative rotation of %.1f�\n',FIB.ang(i).dR);
-            fprintf('   -> Tilt at lift-out position: %.1f�\n',FIB.ang(i).t0);
-            fprintf('   -> Tilt at trenching position: %.1f�\n',FIB.ang(i).t52);
+            fprintf('   -> Relative rotation of %.1fï¿½\n',FIB.ang(i).dR);
+            fprintf('   -> Tilt at lift-out position: %.1fï¿½\n',FIB.ang(i).t0);
+            fprintf('   -> Tilt at trenching position: %.1fï¿½\n',FIB.ang(i).t52);
             if FIB.ang(i).t52 > FIB.ang(i).t52inv + 10 %Suggest 180 deg rotation
-                fprintf('   -> Alternative: Tilt at trenching position: %.1f� + 180� relative rotation\n',FIB.ang(i).t52inv);
+                fprintf('   -> Alternative: Tilt at trenching position: %.1fï¿½ + 180ï¿½ relative rotation\n',FIB.ang(i).t52inv);
             end
-            fprintf('Trench lengths for %.1f �m trench depth (z) and %.1f� trench angle:\n',FIB.trench.z,FIB.trench.ang);
-            fprintf('   -> Trench length (y) at ''downhill position'': %.1f �m\n',FIB.y(i).lower);
-            fprintf('   -> Trench length (y) at ''uphill position'': %.1f �m\n',FIB.y(i).upper);
+            fprintf('Trench lengths for %.1f ï¿½m trench depth (z) and %.1fï¿½ trench angle:\n',FIB.trench.z,FIB.trench.ang);
+            fprintf('   -> Trench length (y) at ''downhill position'': %.1f ï¿½m\n',FIB.y(i).lower);
+            fprintf('   -> Trench length (y) at ''uphill position'': %.1f ï¿½m\n',FIB.y(i).upper);
             fprintf('-------------------------------------------------------------\n');
         end
 end
