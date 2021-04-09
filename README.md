@@ -13,3 +13,5 @@ To run **crystalAligner** open **MATLAB**, navigate to one of the example script
 [![ORTools - How to install MTEX](http://img.youtube.com/vi/SsiDFqqqZU4/0.jpg)](http://www.youtube.com/watch?v=SsiDFqqqZU4 "Video Title")
 
 [*How to install MTEX*](https://youtu.be/SsiDFqqqZU4)
+
+*If you run a MATLAB version that is older than R2016b you may experience convergence problems in the case of single objective optimization (as demonstrated in example 1) which uses the [ga](https://se.mathworks.com/help/gads/ga.html?s_tid=srchtitle) function. The older version of [ga](https://se.mathworks.com/help/gads/ga.html?s_tid=srchtitle) is more likely to run into local minima, which can be somewhat mitigated by increasing the initial population size (try increasing the initial population size from 100 to 200 in examples 1 and 4). Multiobjective optimization problems using gamultiobj are not affected by this.*
