@@ -41,7 +41,7 @@ This case is equivalent to application example 1 in the [*research paper*](./doc
 
 The expected output is:
 
-**Optimization problem 1:**
+**Optimization problem:**
 - Rotation around microscope X-axis: 6.9°
 - Rotation around microscope Z-axis: 132.2°
 - Deviation from ideal alignment in Y-axis: 0.1 °
@@ -61,9 +61,21 @@ This case is equivalent to the application example 2 in the [*research paper*](.
 
 The expected output is:
 
-**Optimization problem 1:**
+**Optimization problem:**
 - Rotation around microscope X-axis: 19.5°
 - Rotation around microscope Z-axis: 7.1°
 - Deviation from ideal alignment in X-axis: 6.3 °
 - Deviation from ideal alignment in Z-axis: 4.1 °
 
+## [Example 4](./cA_example_4.m)
+In the [first example](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-1) we found that the **{100}** can be perfectly aligned while the optimal **{111}** alignment still deviated about 20° from ideal alignment, caused by the significant constraints by the SEM stage rotation limits. Let’s see if we can get an improved allignment for **{111}** by adding a sub-stage on top of our microscope stage. Compared to the setup for [example 1](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-1), a rotation axis around the microscope y-axis was added in *stg.rot*. The rotation limits for this axis are defined as -45 – 45°. 
+
+When adding rotation axes it is important to consider the hierarchy of the rotational axes: The sub-stage represents the 1st tilt rotation which should be aligned with the microscope y-axis as an initial position, the microscope z-axis the 2nd rotation and the microscope x-axis the 3rd rotation (stg.order = [3 1 2]). The additional rotational degree of freedom compared to the setup in [example 1](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-1) leads to perfect alignment of the **{111}** with the microscope z coordinate axis. Repetitive execution of the code will produce different sets of stage-rotations that lead to the same angular deviation, which is an indicator of multiple ideal solutions for the alignment problem (we are not constrained anymore). As an extension you could try to set the limits of the substage to 45 – 45°, which would simulate the use of a fixed 45° pre-tilt sample holder.
+
+The expected output is:
+
+**Optimization problem:**
+- Rotation around microscope X-axis: 13.4° (not reproducible)
+- Rotation around microscope Y-axis: -37.7° (not reproducible)
+- Rotation around microscope Z-axis: 28.9° (not reproducible)
+- Deviation from ideal alignment in Z-axis: 0.0 °
