@@ -27,12 +27,13 @@ Two equivalent crystal plane normals in a cubic crystal with Euler orientation [
 The expected output is:
 
 **Optimization problem 1:**
-   -> Rotation around microscope X-axis: 19.9°
-   -> Rotation around microscope Z-axis: -44.6°
-   -> Deviation from ideal alignment in Z-axis: 19.8 °
+- Rotation around microscope X-axis: 19.9°
+- Rotation around microscope Z-axis: -44.6°
+- Deviation from ideal alignment in Z-axis: 19.8 °
+- 
 **Optimization problem 2:**   
-   -> Rotation around microscope X-axis: 15.0°
-   -> Rotation around microscope Z-axis: 133.1°
-   -> Deviation from ideal alignment in Z-axis: 0.0 °
+- Rotation around microscope X-axis: 15.0°
+- Rotation around microscope Z-axis: 133.1°
+- Deviation from ideal alignment in Z-axis: 0.0 °
 
 
