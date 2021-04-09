@@ -22,7 +22,7 @@ To run **crystalAligner** open **MATLAB**, navigate to one of the example script
 </p>
 
 ## [Example 1](./cA_example_1.m)
-**Single objective optimization: Alignment of either of two crystal plane normals in a cubic crystal**
+**Single-objective optimization: Alignment of either of two equivalent crystal plane normals in a cubic crystal**
 
 Two equivalent crystal plane normals in a cubic crystal with Euler orientation [233 145 33] degrees are aligned in two separate single-objective optimization problems. The crystal could for example represent a ferrite grain in a steel sample. The optimization objective is to align the z-axis of the microscope with either of the **{111}** or **{100}** equivalent plane normals. The stage axes setup chosen here represents a standard stage of an FEI scanning electron microscope with chosen soft-limits in the tilt axis of 0 – 20° (the soft limit was chosen to enable further tilting of the aligned crystal for FIB milling). The genetic algorithm is set up to have a population size of 100 individuals. Optional text output for estimating the trench sizes for a FIB lift-out at an inclined surface may be activated. It is found that the **{100}** can be perfectly aligned while the optimal **{111}** alignment still deviates about 20° from ideal alignment, caused by the significant constraints by the SEM stage rotation limits (for MATLAB distributions <2016b an optimal solution with non-fulfilled linear constraints might be computed, as explained [here](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#possible-convergence-issues-in-older-matlab-versions). 
 
@@ -39,6 +39,8 @@ The expected output is:
 - Deviation from ideal alignment in Z-axis: 0.0 °
 
 ## [Example 2](./cA_example_2.m)
+**Multi-objective optimization: Simultaneous alignment of two equivalent crystal directions in a cubic crystal**
+
 This case is equivalent to application example 1 in the [*research paper*](./doc/crystalAligner_researchPaper_2020.pdf). Here, two equivalent crystal directions in a cubic crystal with Euler orientation [61 42 9] are aligned simultaneously. In this specific application, the crystal represents a β-phase grain in a Ti alloy. The optimization objectives are to align the y-axis of the microscope with any of the **<113>** equivalent crystal directions and the z-axis of the microscope with any of the **<110>** equivalent crystal directions. As in [example 1](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-1), the stage axes represent a standard stage of an FEI scanning electron microscope with chosen soft-limits in the tilt axis of 0 – 20°. The genetic algorithm is set up to have a population size of 100 individuals and no weighting factors applied to the objectives for the choice of the optimal solution. Optional text output for estimating the trench sizes for a FIB lift-out at an inclined surface and plotting of graphs are now activated as well.
 
 The expected output is:
@@ -59,6 +61,8 @@ Trench lengths for 15.0 µm trench depth (z) and 52.0° trench angle:
 - Trench length (y) at 'uphill position': 22.7 µm
 
 ## [Example 3](./cA_example_3.m)
+**Multi-objective optimization: Simultaneous alignment of two equivalent crystal directions of two different crystal structures and orientations**
+
 This case is equivalent to the application example 2 in the [*research paper*](./doc/crystalAligner_researchPaper_2020.pdf). Here, crystal directions in a cubic and an orthorhombic crystal with Euler orientations [261 43 28] and [175 20 102] are aligned. They represent a β-parent grain and an α’’ martensitic variant in a near-β Ti deformation microstructure. The optimization objectives are to align the x-axis of the microscope with any of the **<110>** equivalent directions in β and the z-axis of the microscope with the **[001]** direction of the martensitic α’’. The stage axes represent a standard stage of an FEI scanning electron microscope with chosen soft-limits in the tilt axis of 0 – 20°. The genetic algorithm is set up to have a population size of 500 individuals and no weighting factors applied to the objectives for the choice of the optimal solution. 
 
 The expected output is:
@@ -70,6 +74,8 @@ The expected output is:
 - Deviation from ideal alignment in Z-axis: 4.1 °
 
 ## [Example 4](./cA_example_4.m)
+**Single-objective optimization: Refinement of alignment in [example 1](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-1) by adding a sub-stage**
+
 In the [first example](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-1) we found that the **{100}** can be perfectly aligned while the optimal **{111}** alignment still deviated about 20° from ideal alignment, caused by the significant constraints by the SEM stage rotation limits. Let’s see if we can get an improved allignment for **{111}** by adding a sub-stage on top of our microscope stage. Compared to the setup for [example 1](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-1), a rotation axis around the microscope y-axis was added in *stg.rot*. The rotation limits for this axis are defined as -45 – 45°. 
 
 When adding rotation axes it is important to consider the hierarchy of the rotational axes: The sub-stage represents the 1st tilt rotation which should be aligned with the microscope y-axis as an initial position, the microscope z-axis the 2nd rotation and the microscope x-axis the 3rd rotation (stg.order = [3 1 2]). The additional rotational degree of freedom compared to the setup in [example 1](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-1) leads to perfect alignment of the **{111}** with the microscope z coordinate axis. Repetitive execution of the code will produce different sets of stage-rotations that lead to the same angular deviation, which is an indicator of multiple ideal solutions for the alignment problem (we are not constrained anymore). As an extension you could try to set the limits of the substage to 45 – 45°, which would simulate the use of a fixed 45° pre-tilt sample holder.
@@ -83,6 +89,8 @@ The expected output is:
 - Deviation from ideal alignment in Z-axis: 0.0 °
 
 ## [Example 5](./cA_example_5.m)
+**Multi-objective optimization: Adaption of [example 3](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-3) to show the use of hexagonal Miller indecees**
+
 This example is an adaption of [example 3](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-3) to demonstrate the use of 4-indicee Miller notation for hexagonal crystals and the distinction of crystal directions and plane normal. Here, a set of crystal plane normals in a cubic crystal and a crystal direction in a hexagonal crystal with Euler orientations [246 36 75] and [91 94 13] are aligned. The optimization objectives are to align the x-axis of the microscope with any of the **{011}** equivalent plane normals in the cubic crystal and the z-axis of the microscope with the **<11-20>** equivalent crystal directions of the hexagonal crystal. The stage axes represent a standard stage of an FEI scanning electron microscope with chosen soft-limits in the tilt axis of 0 – 20°. The genetic algorithm is set up to have a population size of 200 individuals and no weighting factors applied to the objectives for the choice of the optimal solution.
 
 The expected output is:
