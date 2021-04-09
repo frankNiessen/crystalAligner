@@ -1,9 +1,10 @@
 % *************************************************************************
 % crystalAligner.m - Crystal Alignment Tool for Electron Microscopy
 % .........................................................................
-% Example 2
-% Concurrent alignment of the <113> and <110> directions in a single cubic 
-% crystal with the y-Axis and z-Axis of the microscope, respectively.
+% Example 3
+% Concurrent alignment of the <011> and [001] directions in a cubic and
+% an orthorhombic crystal with the x-Axis and z-Axis of the microscope, 
+% respectively.
 % *************************************************************************
 % If you use this script for research and find it useful I would appreciate a
 % citation of the associated article:
