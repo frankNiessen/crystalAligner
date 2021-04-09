@@ -30,7 +30,22 @@ The expected output is:
 - Rotation around microscope X-axis: 19.9°
 - Rotation around microscope Z-axis: -44.6°
 - Deviation from ideal alignment in Z-axis: 19.8 °
-- 
+
+**Optimization problem 2:**   
+- Rotation around microscope X-axis: 15.0°
+- Rotation around microscope Z-axis: 133.1°
+- Deviation from ideal alignment in Z-axis: 0.0 °
+
+## [Example 2](./cA_example_2.m)
+This case is equivalent to application example 1 in the [*research paper*](./doc/crystalAligner_researchPaper_2020.pdf). Here, two equivalent crystal directions in a cubic crystal with Euler orientation [61 42 9] are aligned simultaneously. In this specific application, the crystal represents a β-phase grain in a Ti alloy. The optimization objectives are to align the y-axis of the microscope with any of the **[113]** equivalent crystal directions and the z-axis of the microscope with any of the **[110]** equivalent crystal directions. As in [example 1](./cA_example_1.m) The stage axes represent a standard stage of an FEI scanning electron microscope with chosen soft-limits in the tilt axis of 0 – 20°. The genetic algorithm is set up to have a population size of 100 individuals and no weighting factors applied to the objectives for the choice of the optimal solution. Optional text output for estimating the trench sizes for a FIB lift-out at an inclined surface and plotting of graphs are activated.
+
+The expected output is:
+
+**Optimization problem 1:**
+- Rotation around microscope X-axis: 19.9°
+- Rotation around microscope Z-axis: -44.6°
+- Deviation from ideal alignment in Z-axis: 19.8 °
+
 **Optimization problem 2:**   
 - Rotation around microscope X-axis: 15.0°
 - Rotation around microscope Z-axis: 133.1°
