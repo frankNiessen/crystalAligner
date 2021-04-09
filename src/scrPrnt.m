@@ -10,10 +10,15 @@ switch mode
         fprintf('*** Input parameters ***\n');
         fprintf('\nOptimization with algorithm ''%s''',optim.Alg);
         fprintf('\nParallel alignment of:\n');
-        for i = 1:size(crys.alignAx,2)
-           if crys.sym(i); sym=''; else; sym = '(NoSymmetry)'; end
-           fprintf(' - Microscope %s with %s crystal %s: \t%s %s\n',...
-                xyzStr(crys.alignAx(i)),crys.cs{i},crys.type{i},reshape(char(crys.strMil{i})',1,[]),sym);
+        for nrMill = 1:optim.order
+           if crys{nrMill}.Miller.opt.useSym
+               sym='(Symmetry activated)'; 
+           else
+               sym = '(Symmetry deactivated)'; 
+           end
+           fprintf(' - Microscope %s with "%s" %s %s\n',...
+                crys{nrMill}.alignAx.char,crys{nrMill}.CS.mineral,...
+                crys{nrMill}.Miller.char,sym);
         end
         fprintf('Rotational degrees of freedom:\n');
         for r = 1:size(stg.rot,1)
@@ -25,19 +30,24 @@ switch mode
         %Variable Input
         crys = varargin{1};
         optim = varargin{2};
-        i = varargin{3};
+        nrMill = varargin{3};
         %Screen output
-        fprintf('\n*************************************************************');
-        fprintf('\n Optimization problem %.0f - Parallel alignment of:\n',i);
-        fprintf('   -> %s %s %s with microscope %s\n',crys.cs{1},crys.strMil{1}{i},crys.type{1},xyzStr(crys.alignAx(1)));
+
+        fprintf('\n*************************************************************\n');
+        fprintf('Optimization problem %d - Parallel alignment of:\n',nrMill);
+        fprintf('   -> %s %s with microscope %s\n',crys{1}.CS.mineral,crys{1}.Miller(nrMill).char, ...
+                                                   crys{1}.alignAx.char);
         if strcmp(optim.Alg,'gamultiobj')
-           if size(crys.Miller{2},1)==1
-               fprintf('   -> %s %s %s with microscope %s\n',crys.cs{2},char(crys.strMil{2}),crys.type{2},xyzStr(crys.alignAx(2)));
+           if length(crys{2}.Miller)==1
+               fprintf('   -> %s %s with microscope %s\n',crys{2}.CS.mineral,crys{2}.Miller.char,...
+                                                          crys{2}.alignAx.char);
            else
-               fprintf('   -> Either of %s %ss with microscope %s\n',crys.oMil{2}{1}.CS.LaueName,crys.type{2},char(crys.strMil{2}),xyzStr(crys.alignAx(2)));
+               fprintf('   -> Either of %s %s with microscope %s\n',crys{2}.CS.mineral,crys{2}.Miller.char,...
+                                                                    crys{2}.alignAx.char);
            end
         end
         fprintf('*************************************************************\n\n');
+
     case 'Solution'
         %Variable Input
         optim =  varargin{1};
@@ -46,7 +56,8 @@ switch mode
         fprintf('\n*************************************************************');
         fprintf('\nOptimal solution found by shortest distance to origin \n');
         if strcmp(optim.Alg,'gamultiobj')
-            fprintf('under consideration of weighting factors %.0f and %.0f for alignment with microscope %s and %s\n',optim.wghtFac(1),optim.wghtFac(2),xyzStr(crys.alignAx(1)),xyzStr(crys.alignAx(2)));
+            fprintf('under consideration of weighting factors %.0f and %.0f for alignment with microscope axes %s and %s\n',...
+                     optim.wghtFac(1),optim.wghtFac(2),crys{1}.alignAx.char,crys{2}.alignAx.char);
         end
    case 'Result'
         %Variable input
@@ -54,58 +65,59 @@ switch mode
         stg = varargin{2};
         x = varargin{3};
         eps = varargin{4};
-        i = varargin{5};
+        nrMill = varargin{5};
         crys = varargin{6};
         optim = varargin{7};
         %Screen Output
         fprintf('\n-------------------------------------------------------------\n');
-        fprintf('*** Optimization results ***');
+        fprintf('*** Optimization results ***\n');
         if strcmp(optim.Alg,'ga')
-            fprintf('\nOptimal parallel alignment of\n\t-microscope %s with crystal %s %s:\n',...
-                     xyzStr(crys.alignAx(1)),crys.type{1},crys.strMil{1}{i});
+            fprintf('Optimal parallel alignment of\n\t-Microscope axis %s with "%s" %s:\n',...
+                     crys{1}.alignAx.char,crys{1}.CS.mineral,crys{1}.Miller(nrMill).char);
         elseif strcmp(optim.Alg,'gamultiobj')
-            fprintf('\nOptimal parallel alignment of\n\t- microscope %s with %s crystal %s %s and \n\t- microscope %s with %s crystal %s %s:\n',...
-                     xyzStr(crys.alignAx(1)),crys.cs{1},crys.type{1},crys.strMil{1}{i},xyzStr(crys.alignAx(2)),crys.cs{2},crys.type{2},crys.str.optAx);
+            fprintf('\nOptimal parallel alignment of\n\t- microscope axis %s with "%s" %s and \n\t- microscope axis %s with "%s" %s:\n',...
+                     crys{1}.alignAx.char,crys{1}.CS.mineral,crys{1}.Miller(nrMill).char,...
+                     crys{2}.alignAx.char,crys{2}.CS.mineral,crys{2}.Miller.char);
         end
 
         for r = 1:size(stg.rot,1)
-            fprintf('   -> Rotation around microscope %s: %.1f°\n',...
-                 xyzStr(stg.rot(r)), x.out(i,r)*stg.sign(r));
+            fprintf('   -> Rotation around microscope %s: %.2f°\n',...
+                 xyzStr(stg.rot(r)), x.out(nrMill,r));
         end
-        fprintf('   -> Deviation from ideal alignment in %s: %0.1f °\n',...
-                 xyzStr(crys.alignAx(1)),eps.opt(i,1));
+        fprintf('   -> Deviation from ideal alignment in %s: %0.2f°\n',...
+                 crys{1}.alignAx.char,eps.opt(nrMill,1));
          if size(eps.opt,2) == 2
-             fprintf('   -> Deviation from ideal alignment in %s: %0.1f °\n',...
-                 xyzStr(crys.alignAx(2)),eps.opt(i,2));
+             fprintf('   -> Deviation from ideal alignment in %s: %0.2f°\n',...
+                 crys{2}.alignAx.char,eps.opt(nrMill,2));
          end
          fprintf('-------------------------------------------------------------\n');
    case 'FIB_FEIHelios'
         %Variable input
         x = varargin{1};
-        i = varargin{2};
+        nrMill = varargin{2};
         FIB = varargin{3};
         %Calculate upper and lower trench length (y)
-        FIB.ang(i).dR = x.out(i,FIB.axs.rot);
-        FIB.ang(i).t0 = x.out(i,FIB.axs.tilt);
-        FIB.ang(i).t52 = x.out(i,FIB.axs.tilt)+52;
-        FIB.ang(i).t52inv = -x.out(i,FIB.axs.tilt)+52;
+        FIB.ang(nrMill).dR = x.out(nrMill,FIB.axs.rot);
+        FIB.ang(nrMill).t0 = x.out(nrMill,FIB.axs.tilt);
+        FIB.ang(nrMill).t52 = x.out(nrMill,FIB.axs.tilt)+52;
+        FIB.ang(nrMill).t52inv = -x.out(nrMill,FIB.axs.tilt)+52;
         if FIB.mode
-               FIB.y(i).upper = cosd(FIB.ang(i).t0)*FIB.trench.z*sind(FIB.trench.ang)/...
-                             sind(90-FIB.ang(i).t0-FIB.trench.ang);
-               FIB.y(i).lower = cosd(-FIB.ang(i).t0)*FIB.trench.z*sind(FIB.trench.ang)/...
-                             sind(90+FIB.ang(i).t0-FIB.trench.ang);
+               FIB.y(nrMill).upper = cosd(FIB.ang(nrMill).t0)*FIB.trench.z*sind(FIB.trench.ang)/...
+                             sind(90-FIB.ang(nrMill).t0-FIB.trench.ang);
+               FIB.y(nrMill).lower = cosd(-FIB.ang(nrMill).t0)*FIB.trench.z*sind(FIB.trench.ang)/...
+                             sind(90+FIB.ang(nrMill).t0-FIB.trench.ang);
             %Screen output
             fprintf('*** FIB - FEI Helios ***\n');
             fprintf('Apply:\n');
-            fprintf('   -> Relative rotation of %.1f°\n',FIB.ang(i).dR);
-            fprintf('   -> Tilt at lift-out position: %.1f°\n',FIB.ang(i).t0);
-            fprintf('   -> Tilt at trenching position: %.1f°\n',FIB.ang(i).t52);
-            if FIB.ang(i).t52 > FIB.ang(i).t52inv + 10 %Suggest 180 deg rotation
-                fprintf('   -> Alternative: Tilt at trenching position: %.1f° + 180° relative rotation\n',FIB.ang(i).t52inv);
+            fprintf('   -> Relative rotation of %.2f°\n',FIB.ang(nrMill).dR);
+            fprintf('   -> Tilt at lift-out position: %.2f°\n',FIB.ang(nrMill).t0);
+            fprintf('   -> Tilt at trenching position: %.2f°\n',FIB.ang(nrMill).t52);
+            if FIB.ang(nrMill).t52 > FIB.ang(nrMill).t52inv + 10 %Suggest 180 deg rotation
+                fprintf('   -> Alternative: Tilt at trenching position: %.2f° + 180° relative rotation\n',FIB.ang(nrMill).t52inv);
             end
-            fprintf('Trench lengths for %.1f µm trench depth (z) and %.1f° trench angle:\n',FIB.trench.z,FIB.trench.ang);
-            fprintf('   -> Trench length (y) at ''downhill position'': %.1f °m\n',FIB.y(i).lower);
-            fprintf('   -> Trench length (y) at ''uphill position'': %.1f °m\n',FIB.y(i).upper);
+            fprintf('Trench lengths for %.1f µm trench depth (z) and %.2f° trench angle:\n',FIB.trench.z,FIB.trench.ang);
+            fprintf('   -> Trench length (y) at ''downhill position'': %.1f µm\n',FIB.y(nrMill).lower);
+            fprintf('   -> Trench length (y) at ''uphill position'': %.1f µm\n',FIB.y(nrMill).upper);
             fprintf('-------------------------------------------------------------\n');
         end
 end

@@ -1,24 +1,17 @@
 function crys = checkerror(crys)
-assert(length(crys.alignAx) == length(crys.Miller), 'Number of axis-crystalDirection pairs of alignment objetives not equal');  %Check number of alignment axes and alignment objectives
-if isa(crys.o,'cell')
-    assert(length(crys.cs) == length(crys.o),'Number of CrystalSystem-Orientation pairs not equal');  %Check number of crystal systems and orientations
+%function crys = checkerror(crys)
+%Short error check
+
+if length(crys)  == 1 || length(crys)  == 2
+    assert(isfield(crys{1},'alignAx') &&  isfield(crys{1},'Miller') && length(crys{1}.alignAx)==1 && ~isempty(crys{1}.Miller),...
+           'The first alignment objective needs a single microscope axis and at least one crystal directions');  
 else
-    assert(length(crys.cs) == size(crys.o,1),'Number of CrystalSystem-Orientation pairs not equal');  %Check number of crystal systems and orientations
+    error("You may only specify one or two alignment objectives!");
 end
-%Check for different Miller notations
-% safer to handle this natively in MTEX!!!
-% edited defOri() to handle this
-% %{
-% for i = 1:length(crys.Miller)
-%    assert(any(strcmpi(crys.type{i},{'hkl','hkil','uvw','uvtw'})),'Please choose ''uvw'', ''uvtw'', ''hkl'' or ''hkil'' as valid Miller type');
-%    assert(size(crys.Miller{i},2) == 3 || size(crys.Miller{i},2) == 4,'Only 3 or 4 Miller indicees per set allowed');
-%    if size(crys.Miller{i},2) == 4 && any(strcmpi(crys.type(i),{'hkl','hkil'})) %hkil notation
-%       crys.Miller{i} = crys.Miller{i}(:,[1 2 4]);
-%       crys.type{i} = 'hkl';
-%    elseif size(crys.Miller{i},2) == 4 && any(strcmpi(crys.type(i),{'uvw','uvtw'})) %uvtw notation
-%       crys.Miller{i} = [crys.Miller{i}(:,1)-crys.Miller{i}(:,3),crys.Miller{i}(:,2)-crys.Miller{i}(:,3),crys.Miller{i}(:,4)];
-%       crys.type{i} = 'uvw';
-%    end
-% end
-% %}
+if length(crys)  == 2
+    assert(isfield(crys{2},'alignAx') &&  isfield(crys{2},'Miller') && length(crys{2}.alignAx)==1 && length(crys{2}.Miller)==1,...
+           'The second alignment objective needs a single microscope axis and one crystal directions');  
+end
+
+
 end

@@ -36,29 +36,30 @@ iniExtLibs;                                                                %Init
 
 %% Definition of alignment problem
 % ****************************** Crystals *********************************
-crys.ss = 'orthorhombic';
 % *** Crystal Alignment Objective 1
-crys.o{1}       = [61 42 9];                                               %Crystal orientation in Euler angles [pih1 Phi phi2]       
-crys.cs{1}      = 'cubic';                                                 %Crystal structure string (follow MTEX convention)
-crys.alignAx(1) = yvector;                                                 %Microscope axis for alignment with crystal direction/plane; Examples: zvector; [.5 .5 1]; xvector; ...
-crys.Miller{1}  = [1 1 3];                                                 %Miller indices for alignment (in Multiobjective Optimization several Miller-sets will start several optimizations);  Examples: [1 0 0; 1 1 0]; [-1 2 1]; ...
-crys.type{1}    = 'uvw';                                                   %Type of Miller: 'hkl/hkil': Crystal plane; 'uvw/UVTW': Crystal direction
-crys.sym(1)     = true;                                                    %Apply crystal symmetry: true/false
+crys{1}.SS = specimenSymmetry('triclinic');                                %Define specimen symmetry ['triclinic'|'orthorhombic']
+crys{1}.CS = crystalSymmetry('m-3m','mineral','cubicPhase');               %Define crystal symmetry (https://mtex-toolbox.github.io/CrystalSymmetries.html)
+crys{1}.ori = orientation('Euler',61*degree,42*degree,9*degree, ...
+                                  crys{1}.CS,crys{1}.SS);                  %Define crystal orientation (https://mtex-toolbox.github.io/OrientationDefinition.html)   
+crys{1}.alignAx = yvector;                                                 %Microscope axis for alignment with crystal direction/plane; Examples: zvector; [.5 .5 1]; xvector; ...
+crys{1}.Miller = Miller(1,1,3,crys{1}.CS,crys{1}.SS,'uvw');                %Define at least one crystal direction (https://mtex-toolbox.github.io/CrystalDirections.html)
+crys{1}.Miller.opt.useSym = true;                                          %Apply crystal symmetry: true/false
 % *** Crystal Alignment Objective 2
-crys.o{2}       = [61 42 9];                                               %Crystal orientation in Euler angles [pih1 Phi phi2]       
-crys.cs{2}      = 'cubic';                                                 %Crystal structure string (follow MTEX convention)
-crys.alignAx(2) = zvector;                                                 %Microscope axis for alignment with crystal direction/plane; Examples: zvector; [.5 .5 1]; xvector; ...
-crys.Miller{2}  = [1 1 0];                                                 %Miller indices for alignment (in Multiobjective Optimization several Miller-sets will start several optimizations);  Examples: [1 0 0; 1 1 0]; [-1 2 1]; ...
-crys.type{2}    = 'uvw';                                                   %Type of Miller: 'hkl/hkil': Crystal plane; 'uvw/UVTW': Crystal direction
-crys.sym(2)     = true;                                                    %Apply crystal symmetry: true/false
+crys{2}.SS = crys{1}.SS;                                                   %Define specimen symmetry ['triclinic'|'orthorhombic']
+crys{2}.CS = crys{1}.CS;                                                   %Define crystal symmetry (https://mtex-toolbox.github.io/CrystalSymmetries.html)
+crys{2}.ori = crys{1}.ori;                                                 %Define crystal orientation (https://mtex-toolbox.github.io/OrientationDefinition.html)   
+crys{2}.alignAx = zvector;                                                 %Microscope axis for alignment with crystal direction/plane; Examples: zvector; [.5 .5 1]; xvector; ...
+crys{2}.Miller = Miller(1,1,0,crys{2}.CS,crys{2}.SS,'uvw');                %%Define one crystal direction (https://mtex-toolbox.github.io/CrystalDirections.html)
+crys{2}.Miller.opt.useSym = true;                                          %Apply crystal symmetry: true/false
+
 % ******************************* Stage ***********************************                                          
 stg.rot     = [xvector; zvector];                                          %Stage rotation axes                                        
-stg.LB      = [    0    -180 ];                                            %Lower bound [°]
-stg.UB      = [   20    180 ];                                             %Upper bound [°]                                         
+stg.LB      = [    0     -180  ];                                          %Lower bound [°]
+stg.UB      = [   20      180  ];                                          %Upper bound [°]                                         
 stg.sign    = [    1      -1   ];                                          %Sign 1: Right hand rule convention; -1: Left hand rule convention
 stg.order   = [    2      1    ];                                          %Hierarchy / order of rotation: Rotation 1 before 2 before 3; Example: [3 1 2];
-% ************************* Genetic algorithm *****************************
 %Genetic algorithm
+optim.order = length(crys);                                                %Order of optimization problem (do not change)
 optim.popSz = 100;                                                         %Population size
 optim.funcTol = 0.1;                                                       %FunctionTolerance
 optim.maxStallGen = 10;                                                    %Maximum stall generations
@@ -70,7 +71,7 @@ optim.hybridFcn = false;                                                   %Flag
 optim.autoSol = true;                                                      %Flag: Pick optimum solution automatically by distance of Pareto solution from the optimal solution: true/false
 % ***************************** Optional **********************************
 %FIB liftout calculations
-FIB.mode = false;                                                          %Flag: FIB liftout output: true/false
+FIB.mode = true;                                                           %Flag: FIB liftout output: true/false
 FIB.trench.ang = 52;                                                       %Trenching - or look-in - angle of Trench [°]
 FIB.trench.z = 15;                                                         %Trench depth 'z' [µm]
 FIB.axs.tilt = 1;                                                          %Index of tilt axis in 'axs.rot'
@@ -78,26 +79,25 @@ FIB.axs.rot = 2;                                                           %Inde
 %Output
 optim.plot = true;                                                         %Plotting 1: true/false
 
-%% Error checking and PreProcessing
-crys = checkerror(crys);                                                   %Error checking
-%PreProcessing
-crys.nrObj = length(crys.Miller);                                          %Number of alignment objectives
-if ~isfield(crys,'ss') %if it wasn't already defined
-    crys.ss = 'orthorhombic';                                                  %Specimen system
-end
-
 %% Setup Optimization options
-optim = setOptimOpts(crys,optim);                                          %Optimization initialization function
-
-%% Define Crystal system, orientation and crystal directions in mtex & Plot orientations
-[ori,CS,SS,crys] = defOri(crys,optim);                                     %Orientation definition function
+crys = checkerror(crys);                                                   %Error checking
+optim = setOptimOpts(optim);                                               %Optimization initialization function
 scrPrnt('Ini',crys,stg,optim);                                             %Screen print of optimization objectives and limits parameters
-
+%% Plot initial orientations
+if optim.plot
+    for ii = 1:optim.order
+        stereoProj(crys{ii}.ori,crys{ii}.Miller, ...
+                   ['Initial orientation ',num2str(ii)]);                  %Plot stereographic projection of equivalent crystal directions of crystal orientation 'o'
+        figure;                                                            %Create figure
+        plotIPDF(crys{ii}.ori,[xvector,yvector,zvector],'antipodal',...
+            'MarkerFaceColor','k','figSize','small');                      %Plot inverse pole-figure (IPF) [x:(100), y:(010) and z:(001)]
+        set(gcf,'name',['Initial orientation ',num2str(ii)]);
+    end                                                      
+end
+try tileFigs; end; drawnow
 %% Optimization - Multiobjective genetic algorithm
-[oNew,stgRot,x,eps] = runOptim(crys,stg,optim,ori,FIB,SS);                 %Optimization function
+[oNew,stgRot,x,eps] = runOptim(crys,stg,optim,FIB);                        %Optimization function
 
 %% Plot stereographic projection and inverse polefigure of aligned equivalent crystal directions
 plotting(optim,oNew,crys);                                                 %Plotting function
-epsilon = eps.opt;                                                         %Assign return value
-rot = x.opt;                                                               %Assign return value
 fprintf('\n -> All done!\n');                                              %ScreenPrint

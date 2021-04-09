@@ -1,11 +1,11 @@
-function optim = setOptimOpts(crys,optim)
-fprintf('\n -> Setting up optimization algorithm ...\n');                  %ScreenPrint
-if crys.nrObj >= 2
-    optim.Alg = 'gamultiobj';                              %'gamultiobj' - multiobjective optimization
-elseif crys.nrObj == 1
-    optim.Alg = 'ga';                                  %'ga' - single objective optimitzation
+function optim = setOptimOpts(optim)
+fprintf('-> Setting up optimization algorithm ...\n');                 
+if optim.order >= 2
+    optim.Alg = 'gamultiobj';                                              %'gamultiobj' - multiobjective optimization
+elseif optim.order == 1
+    optim.Alg = 'ga';                                                      %'ga' - single objective optimitzation
 else
-    error('%.0f is not a valid objective number',crys.nrObj);             %Error check
+    error('%.0f is not a valid objective number',optim.order);            %Error check
 end
 
 %% Checking version of Matlab
@@ -14,14 +14,14 @@ y = str2double(regexp(v.Release,'\d*','Match'));
 %% Using 'optimoptions' or 'gaoptimset' for newer and older Matlab releases
 if y >= 2016 %Newer or equal Matlab2016a
     optim.opt = optimoptions(optim.Alg);                                   %Create optimization options
-    if crys.nrObj >= 2
+    if optim.order >= 2
         if optim.plot
             optim.opt.PlotFcn = {@gaplotpareto};
         end            %Plot Pareto Front
         if optim.hybridFcn
                 optim.opt.HybridFcn = {@fgoalattain};
         end      %Set hybrid function
-    elseif crys.nrObj == 1
+    elseif optim.order == 1
         if optim.plot
             optim.opt.PlotFcn = {@gaplotbestf};
         end             %Plot best fitness
@@ -31,14 +31,14 @@ if y >= 2016 %Newer or equal Matlab2016a
     end
 else %Older Matlab version: use gaoptimset
     optim.opt = gaoptimset(optim.Alg);                                     %Create optimization options
-     if crys.nrObj >= 2
+     if optim.order >= 2
         if optim.plot
             optim.opt.PlotFcns = {@gaplotpareto};
         end            %Plot Pareto Front
         if optim.hybridFcn
                 optim.opt.HybridFcns = {@fgoalattain};
         end      %Set hybrid function
-    elseif crys.nrObj == 1
+    elseif optim.order == 1
         if optim.plot
             optim.opt.PlotFcns = {@gaplotbestf};
         end             %Plot best fitness
