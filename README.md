@@ -79,3 +79,14 @@ The expected output is:
 - Rotation around microscope Y-axis: -37.7° (not reproducible)
 - Rotation around microscope Z-axis: 28.9° (not reproducible)
 - Deviation from ideal alignment in Z-axis: 0.0 °
+
+## [Example 5](./cA_example_5.m)
+This example is an adaption of [example 3](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-3) to demonstrate the use of 4-indicee Miller notation for hexagonal crystals and the distinction of crystal directions and plane normal. Here, a set of crystal plane normals in a cubic crystal and a crystal direction in a hexagonal crystal with Euler orientations [246 36 75] and [91 94 13] are aligned. The optimization objectives are to align the x-axis of the microscope with any of the **{011}** equivalent plane normals in the cubic crystal and the z-axis of the microscope with the **<11-20>** equivalent crystal directions of the hexagonal crystal. The stage axes represent a standard stage of an FEI scanning electron microscope with chosen soft-limits in the tilt axis of 0 – 20°. The genetic algorithm is set up to have a population size of 200 individuals and no weighting factors applied to the objectives for the choice of the optimal solution.
+
+The expected output is:
+
+**Optimization problem:**
+- Rotation around microscope X-axis: 8.3°
+- Rotation around microscope Z-axis: 147.7°
+- Deviation from ideal alignment in X-axis: 10.1 °
+- Deviation from ideal alignment in Z-axis: 10.4 °
