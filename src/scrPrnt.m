@@ -17,7 +17,7 @@ switch mode
         end
         fprintf('Rotational degrees of freedom:\n');
         for r = 1:size(stg.rot,1)
-            fprintf(' - Rotation around microscope %s: %.1f to %.1f ï¿½\n',...
+            fprintf(' - Rotation around microscope %s: %.1f to %.1f°\n',...
                     xyzStr(stg.rot(r)),stg.LB(r),stg.UB(r));
         end
         fprintf('-------------------------------------------------------------');
@@ -69,13 +69,13 @@ switch mode
         end
 
         for r = 1:size(stg.rot,1)
-            fprintf('   -> Rotation around microscope %s: %.1fï¿½\n',...
+            fprintf('   -> Rotation around microscope %s: %.1f°\n',...
                  xyzStr(stg.rot(r)), x.out(i,r)*stg.sign(r));
         end
-        fprintf('   -> Deviation from ideal alignment in %s: %0.1f ï¿½\n',...
+        fprintf('   -> Deviation from ideal alignment in %s: %0.1f °\n',...
                  xyzStr(crys.alignAx(1)),eps.opt(i,1));
          if size(eps.opt,2) == 2
-             fprintf('   -> Deviation from ideal alignment in %s: %0.1f ï¿½\n',...
+             fprintf('   -> Deviation from ideal alignment in %s: %0.1f °\n',...
                  xyzStr(crys.alignAx(2)),eps.opt(i,2));
          end
          fprintf('-------------------------------------------------------------\n');
@@ -97,15 +97,15 @@ switch mode
             %Screen output
             fprintf('*** FIB - FEI Helios ***\n');
             fprintf('Apply:\n');
-            fprintf('   -> Relative rotation of %.1fï¿½\n',FIB.ang(i).dR);
-            fprintf('   -> Tilt at lift-out position: %.1fï¿½\n',FIB.ang(i).t0);
-            fprintf('   -> Tilt at trenching position: %.1fï¿½\n',FIB.ang(i).t52);
+            fprintf('   -> Relative rotation of %.1f°\n',FIB.ang(i).dR);
+            fprintf('   -> Tilt at lift-out position: %.1f°\n',FIB.ang(i).t0);
+            fprintf('   -> Tilt at trenching position: %.1f°\n',FIB.ang(i).t52);
             if FIB.ang(i).t52 > FIB.ang(i).t52inv + 10 %Suggest 180 deg rotation
-                fprintf('   -> Alternative: Tilt at trenching position: %.1fï¿½ + 180ï¿½ relative rotation\n',FIB.ang(i).t52inv);
+                fprintf('   -> Alternative: Tilt at trenching position: %.1f° + 180° relative rotation\n',FIB.ang(i).t52inv);
             end
-            fprintf('Trench lengths for %.1f ï¿½m trench depth (z) and %.1fï¿½ trench angle:\n',FIB.trench.z,FIB.trench.ang);
-            fprintf('   -> Trench length (y) at ''downhill position'': %.1f ï¿½m\n',FIB.y(i).lower);
-            fprintf('   -> Trench length (y) at ''uphill position'': %.1f ï¿½m\n',FIB.y(i).upper);
+            fprintf('Trench lengths for %.1f µm trench depth (z) and %.1f° trench angle:\n',FIB.trench.z,FIB.trench.ang);
+            fprintf('   -> Trench length (y) at ''downhill position'': %.1f °m\n',FIB.y(i).lower);
+            fprintf('   -> Trench length (y) at ''uphill position'': %.1f °m\n',FIB.y(i).upper);
             fprintf('-------------------------------------------------------------\n');
         end
 end
