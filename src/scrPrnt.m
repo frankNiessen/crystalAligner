@@ -23,7 +23,7 @@ switch mode
         fprintf('Rotational degrees of freedom:\n');
         for r = 1:size(stg.rot,1)
             fprintf(' - Rotation around microscope %s: %.1f to %.1f°\n',...
-                    xyzStr(stg.rot(r)),stg.LB(r),stg.UB(r));
+                    stg.rot(r).char,stg.LB(r),stg.UB(r));
         end
         fprintf('-------------------------------------------------------------');
     case 'Optim'
@@ -82,7 +82,7 @@ switch mode
 
         for r = 1:size(stg.rot,1)
             fprintf('   -> Rotation around microscope %s: %.2f°\n',...
-                 xyzStr(stg.rot(r)), x.out(nrMill,r));
+                 stg.rot(r).char, x.out(nrMill,r));
         end
         fprintf('   -> Deviation from ideal alignment in %s: %0.2f°\n',...
                  crys{1}.alignAx.char,eps.opt(nrMill,1));

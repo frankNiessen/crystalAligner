@@ -83,21 +83,13 @@ optim.plot = true;                                                         %Plot
 crys = checkerror(crys);                                                   %Error checking
 optim = setOptimOpts(optim);                                               %Optimization initialization function
 scrPrnt('Ini',crys,stg,optim);                                             %Screen print of optimization objectives and limits parameters
+
 %% Plot initial orientations
-if optim.plot
-    for ii = 1:optim.order
-        stereoProj(crys{ii}.ori,crys{ii}.Miller, ...
-                   ['Initial orientation ',num2str(ii)]);                  %Plot stereographic projection of equivalent crystal directions of crystal orientation 'o'
-        figure;                                                            %Create figure
-        plotIPDF(crys{ii}.ori,[xvector,yvector,zvector],'antipodal',...
-            'MarkerFaceColor','k','figSize','small');                      %Plot inverse pole-figure (IPF) [x:(100), y:(010) and z:(001)]
-        set(gcf,'name',['Initial orientation ',num2str(ii)]);
-    end                                                      
-end
-try tileFigs; end; drawnow
+plotOrientations(optim,{cell2mat(crys).ori},crys,'initial');
+
 %% Optimization - Multiobjective genetic algorithm
 [oNew,stgRot,x,eps] = runOptim(crys,stg,optim,FIB);                        %Optimization function
 
 %% Plot stereographic projection and inverse polefigure of aligned equivalent crystal directions
-plotting(optim,oNew,crys);                                                 %Plotting function
-fprintf('\n -> All done!\n');                                              %ScreenPrint
+plotOrientations(optim,oNew,crys,'result');                                %Plotting the results
+fprintf('\n -> All done!\n');    
