@@ -2,6 +2,12 @@
 function [oNew,stgRot,x,eps] = runOptim(crys,stg,optim,FIB)
 ori = {cell2mat(crys).ori};
 alignAx = [cell2mat(crys).alignAx];
+
+%Set rotation sign of axes
+for ii = 1:length(alignAx)
+    alignAx(ii) = alignAx(ii)*stg.sign(ii);    
+end
+
 for ii = 1:length(crys{1}.Miller) %Loop over crystal directions
     scrPrnt('Optim',crys,optim,ii);                                     %Screen output optimization problem
     % *** Multiobjective opimization **************************************
@@ -38,8 +44,9 @@ for ii = 1:length(crys{1}.Miller) %Loop over crystal directions
         end
         x.opt(ii,:) = x.ga(ind,:);                                         %Save optimal solution
         eps.opt(ii,:) = eps.ga(ind,:);                                     %Save misalignment of optimal solution
-        x.out(ii,:) = x.opt(ii,:).*stg.sign;                               %Adapt possible different stage rotation convention for output
-
+        %x.out(ii,:) = x.opt(ii,:).*stg.sign;                               %Adapt possible different stage rotation convention for output
+        x.out(ii,:) = x.opt(ii,:);
+        
         %Plot optimal solution
         if optim.plot
             h.ax = findobj('type','axes','tag','gaplotpareto');            %Find axes
@@ -70,8 +77,8 @@ for ii = 1:length(crys{1}.Miller) %Loop over crystal directions
         fMin = @(x)minFunc(x,ori{1},dirs,stg,crys{1}.alignAx);
         % *** Run optimization *****
         [x.opt(ii,:),eps.opt(ii,:)] = ga(fMin,size(stg.rot,1),[],[],[],[],stg.LB,stg.UB,[],optim.opt); %genetic algorithm
-         x.out(ii,:) = x.opt(ii,:).*stg.sign;                                %Adapt possible different stage rotation convention for output
-
+        % x.out(ii,:) = x.opt(ii,:).*stg.sign;                             %Adapt possible different stage rotation convention for output
+        x.out(ii,:) = x.opt(ii,:);
     else
         error('Invalid choice of optimization algorithm');                 %No valid choice of alcrys.oithm
     end
