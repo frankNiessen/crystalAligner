@@ -26,6 +26,11 @@ To run **crystalAligner** open **MATLAB**, navigate to one of the example script
 </p>
 
 ## Fundamentals
+- [Crystal alignment objective](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#crystal-alignment-objective)
+- [Stage](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#stage)
+- [Genetic algorithm settings](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#genetic-algorithm-settings)
+- [Post-processing](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#post-processing)
+
 It is easiest to follow the [examples](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-scripts) to learn how to use **crystalAligner**. However, when working on your own crystal systems, orientations, alignment objectives and microscopes you will need to know how to set up **crystalAligner** properly. I will therefore go through all parameters that can be defined in the header of the [example scripts](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-scripts).
 
 #### Crystal alignment objective
