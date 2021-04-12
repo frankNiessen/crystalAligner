@@ -79,10 +79,10 @@ The post-processing parameters include *optim.plot* which can be set to *true* o
 
 ## Example scripts
 - [Example 1 - Single-objective optimization: Alignment of either of two equivalent crystal plane normals in a cubic crystal](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-1)
-- [Example 2](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-2)
-- [Example 3](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-3)
-- [Example 4](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-4)
-- [Example 5](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-5)
+- [Example 2 - Multi-objective optimization: Simultaneous alignment of two equivalent crystal directions in a cubic crystal](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-2)
+- [Example 3 - Multi-objective optimization: Simultaneous alignment of two equivalent crystal directions of two different crystal structures and orientations](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-3)
+- [Example 4 - Single-objective optimization: Refinement of alignment in example 1 by adding a sub-stage](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-4)
+- [Example 5 - Multi-objective optimization: Adaption of example 3 to show the use of hexagonal Miller indecees](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-5)
 
 ### [Example 1](./cA_example_1.m)
 **Single-objective optimization: Alignment of either of two equivalent crystal plane normals in a cubic crystal**
