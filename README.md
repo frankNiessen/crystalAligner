@@ -38,13 +38,39 @@ This section specifies the crystal and specimen symmetries, the orientation of y
 -  *Miller*: This specifies the crystal direction of crystal plane normal that should be aligned. In MTEX, this is done by using the [Miller](https://mtex-toolbox.github.io/Miller.Miller.html) object. The object simply requires the *Miller* indicees, the crystal and specimen symmetries, as well as the option 'hkl' or 'uvw' to specify plane normals or directions, respectively. In the case of *Miller-Bravais* notation using four indecees, the *hkil* or *UVTW* are valid options to declare crystal plane normals or directions, respectively. You can define multiple crystal directions by concatenating Miller objects like [Miller1,Miller2,Miller3]. This will sequentially solve multiple optimization problems and is only allowd for the first optimization objective. At last we set the option *Miller.opt.useSym* to *true* if we want to use the symmetrically equivalent directions or *false* if we only want to consider the specific direction.
 
 #### Stage
-This section specifies the rotation axes and limits of the rotation stage. The settings in the [example scripts](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-scripts) work for a standard FEI SEM-stage (no warranty - double-check!). The settings in the *stg* structure should enable you to model any microscopy stage. These are the parameters we need to specify:
+This section specifies the rotation axes and limits of the specimen stage. The settings in the [example scripts](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-scripts) work for a standard FEI Helios SEM-stage (confirm this for yourself).
+To demonstrate the concept of the hierarchy of rotation axes, we look at this sample in the image below. We have a [right-handed cartesian coordinate system](https://www.evl.uic.edu/ralph/508S98/coordinates.html) *x, y, z*. In the topview, looking down the optical column of the microscope, we can see that a rotation *r* is defined around *z*. The sketched clockwise rotation with positive sign is opposed to the definition of a positive rotation in a [right-hand coordinate system](https://www.evl.uic.edu/ralph/508S98/coordinates.html). In the front view, looking through the opening chamber door of the microscope, we see that a second rotation, tilt *t*, is defined around *x*. This time the rotation is anti-clockwise and therefore has a positive sign in the [right-hand coordinate system](https://www.evl.uic.edu/ralph/508S98/coordinates.html). The stage hierarchy shows us that *r* is labeled rotation 1 and *t* is labeled rotation 2. The numeration is done according to the order of the rotation axes from upper to lowest. The first rotation only rotates the specimen while the second rotation rotates the specimen and the first rotation axis. This hierarchy can be extended to arbitrarily many rotation axes.
 
-**TO BE FINISHED NEXT WEEK**
+<p align="left">
+  <img src="./doc/images/stageHierarchy.png" alt="Convergence issues of older ga" width="600"/>
+</p>
 
-#### Optional
+The rotation hierarchy is defined in the *stg* structure in the following way:
+-  *rot*: List of the rotation axes in arbitrary order, in the above example these are: *[xvector; zvector]*.
+-  *LB*: Lower bound. This defines the lower limits of the rotations, either in terms of the hard limits or personally chosen soft limits. In the above example we don't allow negative tilt and allow full 360° rotation around *z* by setting the lower bound to -180°: *[0, -180]*
+-  *UB*: Upper bound. This defines the upper limits of the rotations, either in terms of the hard limits or personally chosen soft limits. In the above example we allow tilt up to 20° and full 360° rotation around *z* by setting the upper bound to 180°: *[20, 180]*
+-  *sign*: Here we define whether the rotations have positive or negative sign with respect to the chosen coordinate system. We established that in our above example the tilt around *x* has a positive sense of rotation while rotation around *z* has a negative sense of rotation: *[1, -1]*
+-  *order*: The order of the rotation axes is defined according to the above explained convention, in our example this is: *[2 1]*
 
-**TO BE FINISHED NEXT WEEK**
+#### Genetic algorithm settings
+Here we specify the settings for the genetic algorithm, used to optimize the crystal alignment. This is done in the structure *optim*:
+- *order*: Order of the optimization problem. This is automatically determined from the parameters of the crystal alginment problem, so do not change this.
+- *popSz*: Size of the population of potential solutions. The larger the population, the more solutions are considered in each generation. A large population should be chosen in the case where the alignment problem is very constrained and therefore determination of a global optimum is complicated. In principle a large population can always be chosen, but it leads to a slow-down of the algorithm which in many cases is unnecessary. 
+- *funcTol*: Optimization option *FunctionTolerance*, see [here](https://mathworks.com/help/gads/gamultiobj.html#bvf79ug-options)
+- *maxStallGen*: Optimization option *MaxStallGenerations*, see [here](https://mathworks.com/help/gads/gamultiobj.html#bvf79ug-options)
+- *iterOut*: Writing output for each iteration in subFolder 'iterOut': true/false
+- *wghtFac*: Weighting factors for [TOPSIS multiobjective decision making method](https://en.wikipedia.org/wiki/TOPSIS#cite_note-HwangandYoon1981-1)
+- *multiCore*: Utilization of parallel processing: true/false (not  always faster)
+- *hybridFcn*: Use a hybrid function (may speed op convergence but compromise diversity of solution space): true/false
+- *autoSol*: Pick optimum solution automatically by distance of Pareto solution from the optimal solution: true/false
+
+#### PostProcessing
+The post-processing parameters include *optim.plot* which can be set to *true* or *false* to activate or deactivate plotting, respectively. They further include the structure *FIB* to specify parameters of a possible Focussed Ion Beam (FIB) setup. There parameters will help to calculate the optimized rotation angles at the FIB position and help to estimate trench sizes for TEM lamella preparation at a tilted surface:
+- *mode*: Set this to *true* or *false* to get the additional output.
+- *trench.ang*: Default tilt angle for normal alignment of the FIB with the surface
+- *trench.z*: Depth of the trench to be milled in *µm*
+- *axs.tilt*: Specify which axis in *stg.rot* is the tilt axis
+- *axs.rot*: Specify which axis in *stg.rot* is the rotation axis 
 
 ## Example scripts
 
