@@ -52,14 +52,25 @@ The rotation hierarchy is defined in the *stg* structure in the following way:
 -  *sign*: Here we define whether the rotations have positive or negative sign with respect to the chosen coordinate system. We established that in our above example the tilt around *x* has a positive sense of rotation while rotation around *z* has a negative sense of rotation: *[1, -1]*
 -  *order*: The order of the rotation axes is defined according to the above explained convention, in our example this is: *[2 1]*
 
-The settings in the *stg* structure should enable you to model any microscopy stage. These are the parameters we need to specify:
+#### Genetic algorithm settings
+Here we specify the settings for the genetic algorithm, used to optimize the crystal alignment. This is done in the structure *optim*:
+- *order*: Order of the optimization problem. This is automatically determined from the parameters of the crystal alginment problem, so do not change this.
+- *popSz*: Size of the population of potential solutions. The larger the population, the more solutions are considered in each generation. A large population should be chosen in the case where the alignment problem is very constrained and therefore determination of a global optimum is complicated. In principle a large population can always be chosen, but it leads to a slow-down of the algorithm which in many cases is unnecessary. 
+- *funcTol*: Optimization option *FunctionTolerance*, see [here](https://mathworks.com/help/gads/gamultiobj.html#bvf79ug-options)
+- *maxStallGen*: Optimization option *MaxStallGenerations*, see [here](https://mathworks.com/help/gads/gamultiobj.html#bvf79ug-options)
+- *iterOut*: Writing output for each iteration in subFolder 'iterOut': true/false
+- *wghtFac*: Weighting factors for [TOPSIS multiobjective decision making method](https://en.wikipedia.org/wiki/TOPSIS#cite_note-HwangandYoon1981-1)
+- *multiCore*: Utilization of parallel processing: true/false (not  always faster)
+- *hybridFcn*: Use a hybrid function (may speed op convergence but compromise diversity of solution space): true/false
+- *autoSol*: Pick optimum solution automatically by distance of Pareto solution from the optimal solution: true/false
 
-
-**TO BE FINISHED NEXT WEEK**
-
-#### Optional
-
-**TO BE FINISHED NEXT WEEK**
+#### PostProcessing
+The post-processing parameters include *optim.plot* which can be set to *true* or *false* to activate or deactivate plotting, respectively. They further include the structure *FIB* to specify parameters of a possible Focussed Ion Beam (FIB) setup. There parameters will help to calculate the optimized rotation angles at the FIB position and help to estimate trench sizes for TEM lamella preparation at a tilted surface:
+- *mode*: Set this to *true* or *false* to get the additional output.
+- *trench.ang*: Default tilt angle for normal alignment of the FIB with the surface
+- *trench.z*: Depth of the trench to be milled in *µm*
+- *axs.tilt*: Specify which axis in *stg.rot* is the tilt axis
+- *axs.rot*: Specify which axis in *stg.rot* is the rotation axis 
 
 ## Example scripts
 
