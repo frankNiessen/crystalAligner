@@ -78,7 +78,7 @@ The post-processing parameters include *optim.plot* which can be set to *true* o
 - *axs.rot*: Specify which axis in *stg.rot* is the rotation axis 
 
 ## Example scripts
-- [Example 1](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-1)
+- [Example 1 - Single-objective optimization: Alignment of either of two equivalent crystal plane normals in a cubic crystal](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-1)
 - [Example 2](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-2)
 - [Example 3](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-3)
 - [Example 4](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-4)
