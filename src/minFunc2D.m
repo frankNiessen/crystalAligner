@@ -1,4 +1,4 @@
-function eps = minFunc2D(x,ori,CD1,CD2,alignAx,stg)
+function eps = minFunc2D(x,ori,CD1,CD2,stg,alignAx)
 %function err = minFunc2D(x,o,CD,tensD,wghtFac)
 %Objective function calculating the misalignment of the microscope
 %axes 1 and 2 in 'crys.alignAx' with crystal directions 'CD1' and 'CD2'

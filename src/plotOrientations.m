@@ -7,19 +7,19 @@ if optim.plot
             if strcmpi(mode,'result')
                if cc == 2 
                    titleStr = sprintf('OPTIM %d OBJECTIVE %d "%s": %s aligned with %s',...
-                              ii,cc,crys{cc}.CS.mineral,crys{cc}.Miller.char,crys{cc}.alignAx.char); 
+                              ii,cc,crys(cc).CS.mineral,crys(cc).Miller.char,crys(cc).alignAx.char); 
                else
                    titleStr = sprintf('OPTIM %d OBJECTIVE %d "%s": %s aligned with %s',...
-                              ii,cc,crys{cc}.CS.mineral,crys{cc}.Miller(ii).char,crys{cc}.alignAx.char);
+                              ii,cc,crys(cc).CS.mineral,crys(cc).Miller(ii).char,crys(cc).alignAx.char);
                end
             elseif strcmpi(mode,'initial')
                 titleStr = sprintf('INITIAL "%s": %s to be aligned with %s',...
-                           crys{cc}.CS.mineral,crys{cc}.Miller.char,crys{cc}.alignAx.char);
+                           crys(cc).CS.mineral,crys(cc).Miller.char,crys(cc).alignAx.char);
             else
                 return
             end
             figure;
-            stereoProj(ori{ii}{cc},crys{cc}.Miller,titleStr);          %Plot new crystal directions of interest for z-axis
+            stereoProj(ori{ii}{cc},crys(cc).Miller,titleStr);          %Plot new crystal directions of interest for z-axis
             figure;                                                
             plotIPDF(ori{ii}{cc},[xvector,yvector,zvector],'antipodal',...
                               'MarkerFaceColor','k', 'figsize','small');%Plot inverse pole-figure (IPF) [x:(100), y:(010) and z:(001)]

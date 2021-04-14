@@ -10,7 +10,7 @@ optim = setOptimOpts(optim);                                               %Opti
 scrPrnt('Ini',crys,stg,optim);                                             %Screen print of optimization objectives and limits parameters
 
 %% Plot initial orientations
-plotOrientations(optim,{cell2mat(crys).ori},crys,'initial');
+plotOrientations(optim,{crys.ori},crys,'initial');
 
 %% Optimization - Multiobjective genetic algorithm
 [oNew,stgRot,x,eps] = runOptim(crys,stg,optim,FIB);                        %Optimization function

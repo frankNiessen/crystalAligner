@@ -15,5 +15,5 @@ for r = 1:size(stg.order,2)
     rot(axNr) = rotation('axis',stg.rot(axNr),'angle',x(axNr)*degree);     %Compute rotation around microscope rotation axis 'r' 'stg.rot(r)'
     rotTot = rot(axNr)*rotTot;
 end
-err = min(angle(rotTot*ori*CD,alignAx)/degree);                   %Find misalignment of microscope axis 1 'crys.alignAx(1)' with 'o*CD' subject to rotation 'rotTot'
+err = min(angle(rotTot*ori*CD,alignAx)/degree);                            %Find misalignment of microscope axis 1 'crys.alignAx(1)' with 'o*CD' subject to rotation 'rotTot'
 end

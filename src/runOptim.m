@@ -1,26 +1,19 @@
 %% runOptim - Optimization function
 function [oNew,stgRot,x,eps] = runOptim(crys,stg,optim,FIB)
-ori = {cell2mat(crys).ori};
-alignAx = [cell2mat(crys).alignAx];
 
-%Set rotation sign of axes
-for ii = 1:length(alignAx)
-    alignAx(ii) = alignAx(ii)*stg.sign(ii);    
-end
-
-for ii = 1:length(crys{1}.Miller) %Loop over crystal directions
+for ii = 1:length(crys(1).Miller) %Loop over crystal directions
     scrPrnt('Optim',crys,optim,ii);                                     %Screen output optimization problem
     % *** Multiobjective opimization **************************************
-    if crys{1}.Miller.opt.useSym
-        dirs = symmetrise(crys{1}.Miller(ii));
+    if crys(1).Miller.opt.useSym
+        dirs = symmetrise(crys(1).Miller(ii));
     else
-        dirs = crys{1}.Miller(ii);
+        dirs = crys(1).Miller(ii);
     end 
 
     if strcmp(optim.Alg,'gamultiobj')
         % *** Define optimization function *****
 
-        fMin = @(x)minFunc2D(x,ori,dirs,crys{2}.Miller,alignAx,stg);
+        fMin = @(x)minFunc2D(x,{crys.ori},dirs,crys(2).Miller,stg,[crys.alignAx]);
         % *** Run optimization *****
         % Checking version of Matlab
         v = ver('Matlab');
@@ -44,8 +37,6 @@ for ii = 1:length(crys{1}.Miller) %Loop over crystal directions
         end
         x.opt(ii,:) = x.ga(ind,:);                                         %Save optimal solution
         eps.opt(ii,:) = eps.ga(ind,:);                                     %Save misalignment of optimal solution
-        %x.out(ii,:) = x.opt(ii,:).*stg.sign;                               %Adapt possible different stage rotation convention for output
-        x.out(ii,:) = x.opt(ii,:);
         
         %Plot optimal solution
         if optim.plot
@@ -61,24 +52,22 @@ for ii = 1:length(crys{1}.Miller) %Loop over crystal directions
             rot(axNr) = rotation('axis',stg.rot(axNr),'angle',x.opt(axNr)*degree);     %Compute rotation around microscope rotation axis 'r' 'stg.rot(r)'
             rotTot = rot(axNr)*rotTot;
         end
-        for jj=1:length(crys{2}.Miller)
-            if crys{2}.Miller.opt.useSym
-                dirs = symmetrise(crys{2}.Miller(jj));
+        for jj=1:length(crys(2).Miller)
+            if crys(2).Miller.opt.useSym
+                dirs = symmetrise(crys(2).Miller(jj));
             else
-                dirs = crys{2}.Miller(jj);
+                dirs = crys(2).Miller(jj);
             end
-           epsTemp(jj)=min(angle(rotTot*ori{2}*dirs,alignAx(2))/degree); %Find misalignment of microscope axis 2 'crys.alignAx(2)' with 'o*CD' subject to rotations 'rotX*rotZ'
+           epsTemp(jj)=min(angle(rotTot*crys(2).ori*dirs,crys(2).alignAx)/degree); %Find misalignment of microscope axis 2 'crys.alignAx(2)' with 'o*CD' subject to rotations 'rotX*rotZ'
         end
         [~,crystDirInd] = min(epsTemp);
-        crys{2}.optAx = crys{2}.Miller(crystDirInd);
+        crys(2).optAx = crys(2).Miller(crystDirInd);
     % *** Singleobjective opimization *************************************
     elseif strcmp(optim.Alg,'ga')
         % *** Define optimization function *****
-        fMin = @(x)minFunc(x,ori{1},dirs,stg,crys{1}.alignAx);
+        fMin = @(x)minFunc(x,crys(1).ori,dirs,stg,crys(1).alignAx);
         % *** Run optimization *****
         [x.opt(ii,:),eps.opt(ii,:)] = ga(fMin,size(stg.rot,1),[],[],[],[],stg.LB,stg.UB,[],optim.opt); %genetic algorithm
-        % x.out(ii,:) = x.opt(ii,:).*stg.sign;                             %Adapt possible different stage rotation convention for output
-        x.out(ii,:) = x.opt(ii,:);
     else
         error('Invalid choice of optimization algorithm');                 %No valid choice of alcrys.oithm
     end
@@ -93,8 +82,8 @@ for ii = 1:length(crys{1}.Miller) %Loop over crystal directions
                                        'angle',x.opt(ii,axNr)*degree);     %Convert rotation around microscope axis r 'stg.rot(r)' to Euler angles
         rotTot = stgRot{ii}.ax{axNr}*rotTot;                               %Total rotation
     end
-    for c = 1:length(ori)
-        oNew{ii}{c} = rotTot*ori{c};                                       %Compute new crystal orientation after applied stage tilt and rotation
+    for c = 1:length([crys.ori])
+        oNew{ii}{c} = rotTot*crys(c).ori;                                       %Compute new crystal orientation after applied stage tilt and rotation
     end
 end
 end
