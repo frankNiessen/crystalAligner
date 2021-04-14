@@ -34,7 +34,7 @@ To run **crystalAligner** open **MATLAB**, navigate to one of the example script
 It is easiest to follow the [examples](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-scripts) to learn how to use **crystalAligner**. However, when working on your own crystal systems, orientations, alignment objectives and microscopes you will need to know how to set up **crystalAligner** properly. I will therefore go through all parameters that can be defined in the header of the [example scripts](https://github.com/frankNiessen/crystalAligner/blob/master/README.md#example-scripts).
 
 #### Crystal alignment objective
-This section specifies the crystal and specimen symmetries, the orientation of your crystal, and of course the crystal directions and microscope axes that should be aligned in the optimization problem. You can define one or two alignment objectives, which are stored in the cell arrays *crys{1}* and *crys{2}*, respectively. Let's look at the fields that need to be specified:
+This section specifies the crystal and specimen symmetries, the orientation of your crystal, and of course the crystal directions and microscope axes that should be aligned in the optimization problem. You can define one or two alignment objectives, which are stored in the structure arrays *crys(1)* and *crys(2)*, respectively. Let's look at the fields that need to be specified:
 
 - *SS*: This is the specimen symmetry, which can be specified as 'triclinic' or 'orthorhombic' by the MTEX command [specimenSymmetry](https://mtex-toolbox.github.io/specimenSymmetry.specimenSymmetry.html). 
 - *CS*: This is the crystal symmetry, which needs a point group as an input. Here we also name the crystal symmetry by specifying the option 'mineral'. This is done with the MTEX command [specimenSymmetry](https://mtex-toolbox.github.io/crystalSymmetry.crystalSymmetry.html). In the case where not all unit axes have the same length, it is also important to state the unit vector lengths when defining the crystal symmetry.
@@ -51,10 +51,9 @@ To demonstrate the concept of the hierarchy of rotation axes, we look at this sa
 </p>
 
 The rotation hierarchy is defined in the *stg* structure in the following way:
--  *rot*: List of the rotation axes in arbitrary order, in the above example these are: *[xvector; zvector]*.
+-  *rot*: List of the rotation axes in arbitrary order. We define whether the rotations around these axes have positive or negative sign with respect to a right-hand coordinate system by the sign in front of the axis. We established that in our above example the tilt around *x* has a positive sense of rotation while rotation around *z* has a negative sense of rotation: *[xvector; -zvector]*.
 -  *LB*: Lower bound. This defines the lower limits of the rotations, either in terms of the hard limits or personally chosen soft limits. In the above example we don't allow negative tilt and allow full 360° rotation around *z* by setting the lower bound to -180°: *[0, -180]*
 -  *UB*: Upper bound. This defines the upper limits of the rotations, either in terms of the hard limits or personally chosen soft limits. In the above example we allow tilt up to 20° and full 360° rotation around *z* by setting the upper bound to 180°: *[20, 180]*
--  *sign*: Here we define whether the rotations have positive or negative sign with respect to the chosen coordinate system. We established that in our above example the tilt around *x* has a positive sense of rotation while rotation around *z* has a negative sense of rotation: *[1, -1]*
 -  *order*: The order of the rotation axes is defined according to the above explained convention, in our example this is: *[2 1]*
 
 #### Genetic algorithm settings
