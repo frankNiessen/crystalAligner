@@ -1,0 +1,16 @@
+function [oNew,stgRot,x,eps] = crystalAligner(crys,stg,optim,FIB)
+%% Setup Optimization options
+crys = checkerror(crys);                                                   %Error checking
+optim = setOptimOpts(optim);                                               %Optimization initialization function
+scrPrnt('Ini',crys,stg,optim);                                             %Screen print of optimization objectives and limits parameters
+
+%% Plot initial orientations
+plotOrientations(optim,{cell2mat(crys).ori},crys,'initial');
+
+%% Optimization - Multiobjective genetic algorithm
+[oNew,stgRot,x,eps] = runOptim(crys,stg,optim,FIB);                        %Optimization function
+
+%% Plot stereographic projection and inverse polefigure of aligned equivalent crystal directions
+plotOrientations(optim,oNew,crys,'result');                                %Plotting the results
+end
+
