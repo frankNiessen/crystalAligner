@@ -1,4 +1,9 @@
 function [oNew,stgRot,x,eps] = crystalAligner(crys,stg,optim,FIB)
+%[oNew,stgRot,x,eps] = crystalAligner(crys,stg,optim,FIB)
+% crystalAligner main function
+% This function is generally called from an example script
+% See example scripts and README.md for information on input parameters
+
 %% Setup Optimization options
 crys = checkerror(crys);                                                   %Error checking
 optim = setOptimOpts(optim);                                               %Optimization initialization function
