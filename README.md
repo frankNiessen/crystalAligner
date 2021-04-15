@@ -12,10 +12,11 @@
 **crystalAligner** uses [**MATLAB**](https://mathworks.com/products/matlab.html) and the **MATLAB**-based crystallographic toolbox [**MTEX**](https://mtex-toolbox.github.io) under the hood and it therefore utilize crystal symmetries. Furthermore, the determination of the best stage rotation angles is realized with a [**heuristic optimization algorithm**](https://mathworks.com/discovery/genetic-algorithm.html) which is robust in finding the global optimum. The crystal alignment can therefore often be optimized to a satisfactory degree even in the case of a standard microscope stage with two rotation axes. 
 
 A scientific treatment of the crystallographic aspects and the optimization procedure can be found in the associated [*research paper*](./doc/crystalAligner_researchPaper_2020.pdf). If you like **crystalAligner** and apply it for your research I would appreciate a citation.
+Check out the below video for an introduction to **crystalAligner**.
 
-[![ORTools - How to install MTEX](http://img.youtube.com/vi/7kOkTsVIO-8/0.jpg)](http://https://youtu.be/7kOkTsVIO-8 "Video Title")
+[![An introduction to crystalAligner](http://img.youtube.com/vi/7kOkTsVIO-8/0.jpg)](http://https://youtu.be/7kOkTsVIO-8 "Video Title")
 
-[*How to install MTEX*](https://youtu.be/7kOkTsVIO-8)
+[*An introduction to crystalAligner*](https://youtu.be/7kOkTsVIO-8)
 
 
 ## How to use
