@@ -44,8 +44,7 @@ crys(1).CS = crystalSymmetry('m-3m','mineral','cubicPhase');               %Defi
 crys(1).ori = orientation('Euler',313*degree,15*degree,137*degree, ...
                                   crys(1).CS,crys(1).SS);                  %Define crystal orientation (https://mtex-toolbox.github.io/OrientationDefinition.html)   
 crys(1).alignAx = zvector;                                                 %Microscope axis for alignment with crystal direction/plane; Examples: zvector; [.5 .5 1]; xvector; ...
-crys(1).Miller = [Miller(1,1,1,crys(1).CS,crys(1).SS,'hkl'),...
-                  Miller(1,0,0,crys(1).CS,crys(1).SS,'hkl')];              %Define at least one crystal direction (https://mtex-toolbox.github.io/CrystalDirections.html)
+crys(1).Miller = Miller(1,1,1,crys(1).CS,crys(1).SS,'hkl');              %Define at least one crystal direction (https://mtex-toolbox.github.io/CrystalDirections.html)
 crys(1).Miller.opt.useSym = true;                                          %Apply crystal symmetry: true/false
 % ******************************* Stage ***********************************                                               
 stg.rot     = [xvector; yvector; -zvector];                                 %Stage rotation axes                                        
