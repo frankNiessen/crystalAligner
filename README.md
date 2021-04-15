@@ -14,7 +14,7 @@
 A scientific treatment of the crystallographic aspects and the optimization procedure can be found in the associated [*research paper*](./doc/crystalAligner_researchPaper_2020.pdf). If you like **crystalAligner** and apply it for your research I would appreciate a citation.
 Check out the below video for an introduction to **crystalAligner**.
 
-[![An introduction to crystalAligner](http://img.youtube.com/vi/7kOkTsVIO-8/0.jpg)](http://https://youtu.be/7kOkTsVIO-8 "Video Title")
+[![An introduction to crystalAligner](http://img.youtube.com/vi/7kOkTsVIO-8/0.jpg)](http://www.youtube.com/watch?v=7kOkTsVIO-8 "Video Title")
 
 [*An introduction to crystalAligner*](https://youtu.be/7kOkTsVIO-8)
 
